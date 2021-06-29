@@ -6,8 +6,8 @@ import  matplotlib.pyplot as plt
 
 #Distance between the robots, length of side of square
 d = 2
-l = 2
-b = 1
+l = 3
+b = 2
 
 def get_rob_gposes(centroid):
     P1_x = centroid[0]- d/2

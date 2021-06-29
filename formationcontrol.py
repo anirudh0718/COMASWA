@@ -9,14 +9,15 @@ start = []
 #start.append(get_rob_gposes(np.array([0,0])))
 start.append(get_rob_rec_pos(np.array([0,0])))
 
+
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([8,0]))) # sqaure
-goal.append(get_turn_orient(np.array([3,5]))) # Turned Rectangle
+goal.append(get_turn_orient(np.array([20,20]))) # Turned Rectangle
 
 
-print('These are the starting postions of the robots',start)
-print('These are goal position f the robots',goal)
+#print('These are the starting postions of the robots',start)
+#print('These are goal position f the robots',goal)
 
 
 # Inititate our robots
@@ -44,8 +45,8 @@ x_init4 = start[0][3]
 goal_init4 =goal[0][3]
 Robot4 = Robot_Sim(x_init4, goal_init4,3)
 
-const_obs = np.array([[10], [10]])
-const_obs2 = np.array([[-20], [-20]])
+const_obs = np.array([[8], [8]])
+const_obs2 = np.array([[5], [5]])
 
 # These are static obstacles we present to the robot
 obs = np.hstack((const_obs2, const_obs))
@@ -58,7 +59,7 @@ poses = get_pose(Robots)
 
 a, ax1 = plt.subplots()
 
-for tt in range(8000):
+for tt in range(1000):
 
     dxi = np.zeros((2, N))
     safe_dxi = np.zeros((2,N))
@@ -70,7 +71,7 @@ for tt in range(8000):
             IF Id = 5 --> Only Formation lesser case and obstacle avoidance
             Formation greater case = |xi -xj| - (Df - e) > 0"""
         if tt>0:            
-            Robots[i].robot_step(obs,Robots,i,4)
+            Robots[i].robot_step(obs,Robots,i,3)
             
 
     if tt%50 ==0:
@@ -78,7 +79,7 @@ for tt in range(8000):
         plt.cla()
 
         for robot in Robots:
-            plot_step(robot.state_hist,ax1)
+            plot_step(robot.state_hist,ax1,obs)
             
         plt.pause(0.1)
 for robot in Robots:

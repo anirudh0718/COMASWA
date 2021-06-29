@@ -3,10 +3,20 @@ import matplotlib.pyplot as plt
 import time
 from cvxopt import matrix, solvers
 
-# Distance between the robot and obstacle (minimal)
-Ds = 2 
+# Number of robots
+N = 4
 
-e = 0.05
+# Laplacian matrix for a square/Rectangle shape with 4 robots
+L = np.array([
+    [3, -1, -1, -1],
+    [-1, 2, -1, 0],
+    [-1, -1, 3, -1],
+    [-1, 0 , -1, 2]]) 
+
+# Distance between the robot and obstacle (minimal)
+Ds = 5
+
+e = 0.4
 
 
 # Formation Distance for square shape
@@ -24,10 +34,10 @@ weights = np.array([
 ])
 
 # Formation Distance for rectangle shape
-Df_l = 2
-Df_b = 1
+Df_l = 3
+Df_b = 2
 
-ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))
+ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 
 weights_rec = np.array([
     [0, Df_b,ddiag_rec,Df_l],
@@ -36,14 +46,8 @@ weights_rec = np.array([
     [Df_l, 0,Df_b, 0]
 ])
 
-# Laplacian matrix for a square shape with 4 robots
-L = np.array([
-    [3, -1, -1, -1],
-    [-1, 2, -1, 0],
-    [-1, -1, 3, -1],
-    [-1, 0 , -1, 2]]) 
-# Number of robots
-N = 4
+
+
 
 def topological_neighbors(L, agent):
     """ Returns the neighbors of a particular agent using the graph Laplacian
@@ -76,38 +80,32 @@ def compute_hobs(obst,state):
         xo = sub[0]
         yo = sub[1]
         h[i] = np.power(xo,2)+ np.power(yo,2)- np.power(Ds,2) 
-    return h
+    return 50*h
 
 # Compute hf for only greater than inequality
 def compute_hf_g(state,Robots,i):
     hf = np.zeros((len(topological_neighbors(L,i)), 1))
-    diff ={}
+    idx = 0    
     for j in topological_neighbors(L,i):
         sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
         xo = sub[0]
         yo = sub[1]
             
-        diff[j]= (np.power(xo,2)+ np.power(yo,2))
-
-    for m in range(len(diff.keys())):
-        for key in diff.keys():
-            hf[m] =  diff[key]- np.power(weights_rec[i,key] - e,2)
+        hf[idx]= (np.power(xo,2)+ np.power(yo,2)) - np.power(weights_rec[i,j] - e,2)
+        idx += 1
 
     return hf
 # Compute hf for only lesser than inequality
 def compute_hf_l(state,Robots,i):
     hf = np.zeros((len(topological_neighbors(L,i)), 1))
-    diff ={}
+    idx = 0
     for j in topological_neighbors(L,i):
         sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
         xo = sub[0]
         yo = sub[1]
             #print(xo,yo)
-        diff[j]= (np.power(xo,2)+ np.power(yo,2))
-
-    for m in range(len(diff.keys())):
-        for key in diff.keys():
-            hf[m] =  np.power(weights_rec[i,key]+e,2) - diff[key]
+        hf[idx]= np.power(weights_rec[i,j] + e,2) - (np.power(xo,2)+ np.power(yo,2))
+        idx += 1
 
     return hf
 

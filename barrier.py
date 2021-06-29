@@ -4,7 +4,7 @@ import time
 from cvxopt import matrix, solvers
 import functions
 
-K = 0.2
+K = 1
 # Class Defining our CBF control
 
 class ebcf_control:
@@ -64,24 +64,26 @@ class ebcf_control:
     def compute_safe(self,obs,Robots,i,id):
         P = np.array([[2, 0],[0, 2]])
         q = 2*self.compute_nom().reshape(2,)
-        h = 1*self.compute_h(obs,Robots,i,id)
+        h = self.compute_h(obs,Robots,i,id)
+
+        print('This is h',h)
         self.h['h'].append(h)
         self.dist.append(functions.calc_dist(self.state,Robots,i))
         G = self.compute_G(obs,Robots,i,id)
         
-        sol = solve_qp(P,q,G,h)
-        u_st = sol['x']
-        """ try:
+        #sol = solve_qp(P,q,G,h)
+        #u_st = sol['x']
+        try:
             sol = solve_qp(P,q,G,h)
             u_st = sol['x']
         except ValueError:
-            u_st = [0,0] """
+            u_st = matrix([0,0])
         return u_st
 
     # Creates respective arrays for h(x) values to be stored for plotting
     def create_h_arr(self):
         arr_list =[]
-        print('These are number of values in one h(x) array',len(self.h['h'][0]))
+        #print('These are number of values in one h(x) array',len(self.h['h'][0]))
         for i in range(len(self.h['h'][0])):
             arr_list.append(np.zeros((len(self.h['h']),1)))
         return arr_list
@@ -89,7 +91,7 @@ class ebcf_control:
     # Creates respective arrays for h(x) values to be stored for plotting
     def create_d_arr(self):
         arr_list =[]
-        print('These are number of values in one h(x) array',len(self.dist[0]))
+        #print('These are number of values in one distance array',len(self.dist[0]))
         for i in range(len(self.dist[0])):
             arr_list.append(np.zeros((len(self.dist),1)))
         return arr_list
@@ -100,7 +102,7 @@ class ebcf_control:
         plt.xlabel("Time(t)")
         plt.ylabel("h(x)")
         plt.title('Plot of h(x) array with {} values for robot {}'.format(len(self.h['h'][0]),self.id + 1))
-        print(self.h['h'][0])
+        #print(self.h['h'][0])
         for i in range(len(h_list)):
             for j in range(len(self.h['h'])):
                 h_list[i][j] = self.h['h'][j][i]
@@ -115,7 +117,7 @@ class ebcf_control:
         plt.xlabel("Time(t)")
         plt.ylabel("h(x)")
         plt.title('Plot of distance of robot {} w.rt to othe robots'.format(self.id))
-        print('This is the distance of robot {} w.rt to othe robots'.format(self.id),self.dist[0])
+        #print('This is the distance of robot {} w.rt to othe robots'.format(self.id),self.dist[0])
         for i in range(len(d_list)):
             for j in range(len(self.dist)):
                 d_list[i][j] = self.dist[j][i]
