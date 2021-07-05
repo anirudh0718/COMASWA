@@ -19,8 +19,8 @@ class Robot_Sim():
 
 
     # Calcute safe velocity for the robots and update its dynamics
-    def robot_step(self, obs,Robots,i,id):
-        u_hat_acc = self.ecbf.compute_safe(obs,Robots,i,id)
+    def robot_step(self, obs,Robots,i,id,L,weights,e):
+        u_hat_acc = self.ecbf.compute_safe(obs,Robots,i,id,L,weights,e)
         
         u_hat_acc = np.ndarray.flatten(np.array(u_hat_acc)) 
 
