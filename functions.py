@@ -89,11 +89,11 @@ def compute_hf_Form(state,a,b,t,centre):
 
     xo = sub[0]
     yo = sub[1]
-    #xobs = -sub[0]
-    #yobs = -sub[1]
-    #xalphobs= np.power(xo,2)*((2/a**2)*(np.cos(t)*(-np.sin(t))) + (2/b**2)*np.sin(t)*(np.cos(t))) +np.power(yo,2)*((2/a**2)*(np.cos(t)*(np.sin(t))) - (2/b**2)*np.sin(t)*(np.cos(t))) + 2*xo*yo*(1/a**2 - 1/b**2)*(np.power(np.cos(t),2)-np.powr(np.sin(t),2))
+    xobs = -sub[0]
+    yobs = -sub[1]
+#    xalphobs= np.power(xo,2)*((2/a**2)*(np.cos(t)*(-np.sin(t))) + (2/b**2)*np.sin(t)*(np.cos(t))) +np.power(yo,2)*((2/a**2)*(np.cos(t)*(np.sin(t))) - (2/b**2)*np.sin(t)*(np.cos(t))) + 2*xo*yo*(1/a**2 - 1/b**2)*(np.power(np.cos(t),2)-np.powr(np.sin(t),2))
 
-    #rel_vel = 
+    rel_vel = 0
     #velocity_factor = xobs*vel[0] + yobs*vel[1]
     #h =  np.power((xo*np.cos(t)-yo*np.sin(t)),2)/np.power(3,2) +  np.power((xo*np.sin(t)-yo*np.cos(t)),2)/np.power(2,2) - np.power(1,2) 
     h = (np.power(np.cos(t),2)/a**2+ np.power(np.sin(t),2)/b**2)*(np.power(xo,2)) + (np.power(np.sin(t),2)/a**2+np.power(np.cos(t),2)/b**2)*(np.power(yo,2)) + 2*xo*yo*(1/a**2 - 1/b**2) - 1
@@ -108,7 +108,7 @@ def compute_hf_Form(state,a,b,t,centre):
 
     #print('This is th value of h: ',h)
 
-    return 0.05*h
+    return 0.5*h
 
 # Compute h for only formation
 

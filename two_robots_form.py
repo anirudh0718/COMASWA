@@ -126,11 +126,6 @@ def f_control(N,rbts,rbts1):
     while not check_goal_reached(rbts):
 
         tt = tt +1
-
-        dxi = np.zeros((2, N))
-        safe_dxi = np.zeros((2,N))
-        n = 0
-        r = 0
         for i in range(N):          
             cent['cent_F1'] = get_form_cent(rbts)
             #print(cent['cent_F1'])

@@ -3,6 +3,7 @@ from robot import Robot_Sim
 from plotrob import plot_step
 import  matplotlib.pyplot as plt
 from FC_to_Goal import get_rob_gposes,get_pose,get_rob_rec_pos,get_turned_rec,get_turn_orient
+from math import degrees
 
 
 # Define the laplacian and weights for SQUARE AND RECTANGLE
@@ -85,23 +86,23 @@ def get_form_cent(rbts):
 def get_angle(poses):
     
     #print(poses[:,0][1])
-    diff = poses[:,0] - poses[:,3]
+    diff = poses[:,0] - poses[:,len(poses)-1]
     angle = np.arctan2(diff[1],diff[0])
-    return angle
+    return degrees(angle)
 
 
         
 # Starting postion of our robots
 start = []
 #start.append(get_rob_gposes(np.array([0,0])))
-start.append(get_rob_rec_pos(np.array([2.5,2.5])))
-start.append((get_rob_rec_pos(np.array([13,10]))))
+start.append(get_rob_rec_pos(np.array([0,0])))
+start.append((get_rob_rec_pos(np.array([20,0]))))
 
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_turn_orient(np.array([30,30]))) # Turned Rectangle
-goal.append(get_turn_orient(np.array([0,11])))
+goal.append(get_turn_orient(np.array([20,0]))) # Turned Rectangle
+goal.append(get_turn_orient(np.array([0,0])))
 
 #print('These are the starting postions of the robots',start)
 #print('These are goal position f the robots',goal)
@@ -132,8 +133,7 @@ x_init4 = start[0][3]
 goal_init4 =goal[0][3]
 Robot4 = Robot_Sim(x_init4, goal_init4,3)
 
-const_obs = np.array([[13], [10]])
-const_obs2 = np.array([[13], [22]])
+
 
 
 
@@ -212,7 +212,7 @@ def check_goal_reached(Robots):
 def f_control(N,rbts):
 
     tt = 0
-    while not check_goal_reached(rbts) and tt<10000:
+    while not check_goal_reached(rbts):
 
         tt = tt +1
 
