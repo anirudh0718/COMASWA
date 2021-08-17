@@ -22,7 +22,7 @@ class ebcf_control:
         self.dist = []
     
     # Compute h for the chosen case wrt to id provided
-    def compute_h(self,obs,Robots,n,r,id,L,weights,e,centre,angle):
+    def compute_h(self,obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel):
         if id ==1:
             # Implement barrier for only Obstacles
             h = functions.compute_hobs(obs,self.state)
@@ -42,7 +42,7 @@ class ebcf_control:
             #Implement for both obstacles and formation
             h = functions.compute_hf_4(obs,self.state,Robots,n,r,L,weights,e,centre,angle)
         if id ==7:
-            h= functions.compute_hf_7(obs,self.state,Robots,n,r,L,weights,e,centre,angle)
+            h= functions.compute_hf_7(obs,self.state,Robots,n,r,L,weights,e,centre,angle,c_vel)
         if id ==8:
             h = functions.compute_hf_Form(self.state,3,2,angle,centre)
         return h
@@ -82,12 +82,12 @@ class ebcf_control:
         u_nom = K*((self.state["q"][:2]).T-self.goal.T )
         return u_nom
 
-    def compute_safe(self,obs,Robots,n,r,id,L,weights,e,centre,angle):
+    def compute_safe(self,obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel):
 
         #print('This is i: ',i)
         P = np.array([[2, 0],[0, 2]])
         q = 2*self.compute_nom().reshape(2,)
-        h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle)
+        h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel)
 
         self.h['h'].append(h)
         #self.dist.append(functions.calc_dist(self.state,Robots,n,r,L))

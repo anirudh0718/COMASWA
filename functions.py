@@ -83,7 +83,7 @@ def compute_hf_l(state,Robots,n,r,L,weights,e):
 
 # Compute hf between formations
 
-def compute_hf_Form(state,a,b,t,centre):
+def compute_hf_Form(state,a,b,t,centre,c_vel):
     #print('This is the elliptical centre: ',centre)
     sub = np.atleast_2d(state["q"][:2]).T - centre.reshape(2,1)
 
@@ -91,9 +91,10 @@ def compute_hf_Form(state,a,b,t,centre):
     yo = sub[1]
     xobs = -sub[0]
     yobs = -sub[1]
-#    xalphobs= np.power(xo,2)*((2/a**2)*(np.cos(t)*(-np.sin(t))) + (2/b**2)*np.sin(t)*(np.cos(t))) +np.power(yo,2)*((2/a**2)*(np.cos(t)*(np.sin(t))) - (2/b**2)*np.sin(t)*(np.cos(t))) + 2*xo*yo*(1/a**2 - 1/b**2)*(np.power(np.cos(t),2)-np.powr(np.sin(t),2))
+    xalphobs= np.power(xo,2)*((2/a**2)*(np.cos(t)*(-np.sin(t))) + (2/b**2)*np.sin(t)*(np.cos(t))) +np.power(yo,2)*((2/a**2)*(np.cos(t)*(np.sin(t))) - (2/b**2)*np.sin(t)*(np.cos(t))) + 2*xo*yo*(1/a**2 - 1/b**2)*(np.power(np.cos(t),2)-np.power(np.sin(t),2))
 
-    rel_vel = 0
+    rel_vel = c_vel
+    alpha_dot = rel_vel/1.5
     #velocity_factor = xobs*vel[0] + yobs*vel[1]
     #h =  np.power((xo*np.cos(t)-yo*np.sin(t)),2)/np.power(3,2) +  np.power((xo*np.sin(t)-yo*np.cos(t)),2)/np.power(2,2) - np.power(1,2) 
     h = (np.power(np.cos(t),2)/a**2+ np.power(np.sin(t),2)/b**2)*(np.power(xo,2)) + (np.power(np.sin(t),2)/a**2+np.power(np.cos(t),2)/b**2)*(np.power(yo,2)) + 2*xo*yo*(1/a**2 - 1/b**2) - 1
@@ -107,8 +108,9 @@ def compute_hf_Form(state,a,b,t,centre):
         h[i] =  """
 
     #print('This is th value of h: ',h)
+    h =  h + xobs*rel_vel[0] + yobs*rel_vel[1] + xalphobs*alpha_dot
 
-    return 0.5*h
+    return 0.05*h
 
 # Compute h for only formation
 
@@ -127,8 +129,11 @@ def compute_hf_4(obs,state,Robots,n,r,L,weights,e,centre,angle):
     return com_h
 
 #Compute h for obs(centre) and Formation
-def compute_hf_7(obs,state,Robots,n,r,L,weights,e,centre,angle):
-    com_h = np.vstack((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e)))
+def compute_hf_7(obs,state,Robots,n,r,L,weights,e,centre,angle,c_vel):
+    a = 2
+    vel_fac = np.array([a,a]).reshape(2,1)
+
+    com_h = np.vstack((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre,c_vel),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
     return com_h
 
 #Compute h for obs and Formation_greater case
@@ -174,7 +179,9 @@ def compute_Gf_7(obs,state,Robots,n,r,L,centre,angle):
     A = -2*compute_A_obs(state,obs)
     Af = compute_Gf(state,Robots,n,r,L)
     AF = compute_A_F(state,3,2,centre,angle)
-    Af_4 = np.vstack((A,AF,Af))
+    A1 = np.identity((2))
+    A2 = -A1
+    Af_4 = np.vstack((A,AF,Af,A1,A2))
     return Af_4
 # Compute G for obs and form_greater case
 

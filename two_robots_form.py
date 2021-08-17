@@ -79,7 +79,7 @@ const_obs2 = np.array([[30], [40]])
 # These are static obstacles we present to the robot
 obs = np.hstack((const_obs, const_obs2))
 N = len(roro)
-cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0}
+cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[]}
 a, ax1 = plt.subplots()
 
 Top = 1
@@ -118,6 +118,11 @@ def check_goal_reached(Robots):
         else:
             return False
 
+def calc_vel(pres,prev,dt):
+    rel_vel = np.divide(np.subtract(pres,prev),dt)
+
+    return rel_vel
+
 
 
 def f_control(N,rbts,rbts1):
@@ -150,9 +155,13 @@ def f_control(N,rbts,rbts1):
             if tt>0:
 
 
-                rbts[i].robot_step(obs,roro,i,i,7,L2,weights_rec2,e1,cent['cent_F2'],cent['AF2'])
-                rbts1[i].robot_step(obs,roro1,i,i,7,L2,weights_rec2,e1,cent['cent_F1'],cent['AF1'])
+                rbts[i].robot_step(obs,roro,i,i,7,L2,weights_rec2,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'])
+                rbts1[i].robot_step(obs,roro1,i,i,7,L2,weights_rec2,e1,cent['cent_F1'],cent['AF1'],cent['rel_velF1'])
                 
+                cent['rel_velF1'] = calc_vel(get_form_cent(rbts),cent['cent_F1'],0.01)
+                cent['rel_velF2'] = calc_vel(get_form_cent(rbts1),cent['cent_F2'],0.01)
+
+            #print(cent['rel_velF1'])
             
 
         if tt%50 ==0:

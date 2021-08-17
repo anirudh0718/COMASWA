@@ -170,7 +170,7 @@ const_obs2 = np.array([[25], [35]])
 
 form = np.array([[60], [60]])
 
-cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0}
+cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[]}
 
 # These are static obstacles we present to the robot
 obs = np.hstack((const_obs, const_obs2))
@@ -207,6 +207,11 @@ def check_goal_reached(Robots):
         else:
             return False
 
+def calc_vel(pres,prev,dt):
+    rel_vel = np.divide(np.subtract(pres,prev),dt)
+
+    return rel_vel
+
 
 
 def f_control(N,rbts):
@@ -221,9 +226,11 @@ def f_control(N,rbts):
         n = 0
         r = 0
         for i in range(4):
-
             cent['cent_F1'] = get_form_cent(Robots1)
-            cent['cent_F2'] = get_form_cent(Robots2) #np.array([10,10]).reshape(2,)
+            cent['cent_F2'] = get_form_cent(Robots2)
+
+             #np.array([10,10]).reshape(2,)
+
 
             #print(cent['cent_F1'],cent['cent_F2'])
             cent['AF1'] = get_angle(get_pose(Robots1))
@@ -246,12 +253,13 @@ def f_control(N,rbts):
             if tt>0:
                 Robots1[i].robot_step(obs,Robots1,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],cent['AF2'])
                 Robots2[i].robot_step(obs,Robots2,i,i,7,L3,weights_rec3,e1,cent['cent_F1'],cent['AF1'])
-                """ if tt < 300:
-                    #Robots2[i].robot_step(obs,Robots2,i,i,7,L3,weights_rec3,e1,cent['cent_F1'],cent['AF1'])
-                    Robots1[i].robot_step(obs,Robots1,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],cent['AF2']) """
 
-
+                cent['rel_velF1'] = calc_vel(get_form_cent(Robots1),cent['cent_F1'],0.01)
+                cent['rel_velF2'] = calc_vel(get_form_cent(Robots2),cent['cent_F2'],0.01)
                 
+
+
+            print(np.round(cent['rel_velF1'],4))
                 
 
                 
