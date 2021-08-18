@@ -23,3 +23,7 @@ np.array([
 
 
 ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))
+
+
+xo = 2*sub[0]*(np.power(np.cos(t),2)/a**2+ np.power(np.sin(t),2)/b**2) + 2*sub[1]*(1/a**2 - 1/b**2)
+    yo = 2*sub[1]*(np.power(np.sin(t),2)/a**2+np.power(np.cos(t),2)/b**2) + 2*sub[0]*(1/a**2 - 1/b**2)

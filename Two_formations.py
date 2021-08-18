@@ -170,7 +170,7 @@ const_obs2 = np.array([[25], [35]])
 
 form = np.array([[60], [60]])
 
-cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[]}
+cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[],'alpha_dotF1':0,'alpha_dotF2':0}
 
 # These are static obstacles we present to the robot
 obs = np.hstack((const_obs, const_obs2))
@@ -195,7 +195,7 @@ cent['cent_F2'] = get_form_cent(Robots2).reshape(2,1)
 """ print(cent['cent_F1'])
 exit() """
 
-a, ax1 = plt.subplots()
+a, ax1 = plt.subplots(figsize=(15,15))
 
 Top = 1
 
@@ -251,16 +251,18 @@ def f_control(N,rbts):
             IF Id = 8 --> Only ellipticalobstacle avoidance
             Formation greater case = |xi -xj| - (Df - e) > 0"""
             if tt>0:
-                Robots1[i].robot_step(obs,Robots1,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],cent['AF2'])
-                Robots2[i].robot_step(obs,Robots2,i,i,7,L3,weights_rec3,e1,cent['cent_F1'],cent['AF1'])
+                Robots1[i].robot_step(obs,Robots1,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF1'])
+                Robots2[i].robot_step(obs,Robots2,i,i,7,L3,weights_rec3,e1,cent['cent_F1'],cent['AF1'], cent['rel_velF1'],cent['alpha_dotF2'])
 
                 cent['rel_velF1'] = calc_vel(get_form_cent(Robots1),cent['cent_F1'],0.01)
                 cent['rel_velF2'] = calc_vel(get_form_cent(Robots2),cent['cent_F2'],0.01)
+
+                cent['alpha_dotF1'] = calc_vel(get_angle(get_pose(Robots1)),cent['AF1'],0.01)
+                cent['alpha_dotF2'] = calc_vel(get_angle(get_pose(Robots2)),cent['AF2'],0.01)
                 
 
 
-            print(np.round(cent['rel_velF1'],4))
-                
+            #print(np.round(cent['rel_velF1'],4))
 
                 
           

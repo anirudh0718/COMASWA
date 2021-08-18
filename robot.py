@@ -24,12 +24,15 @@ class Robot_Sim():
 
 
     # Calcute safe velocity for the robots and update its dynamics
-    def robot_step(self, obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel):
+    def robot_step(self, obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot):
         self.p_fcentre.append(centre.reshape(2,))
         """ if id ==6 and i > 3:
+
+
+
             i == 4 """
         
-        u_hat_acc = self.ecbf.compute_safe(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel)
+        u_hat_acc = self.ecbf.compute_safe(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot)
         
         u_hat_acc = np.ndarray.flatten(np.array(u_hat_acc)) 
 

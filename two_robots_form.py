@@ -5,6 +5,11 @@ import  matplotlib.pyplot as plt
 from FC_to_Goal import get_rob_gposes,get_pose,get_rob_rec_pos,get_turned_rec,get_turn_orient
 from formge import gen2
 from math import degrees
+
+import time
+start_time = time.time()
+
+
 # Tolerance
 e1 = 0.1
 e2 = 0.4
@@ -79,8 +84,8 @@ const_obs2 = np.array([[30], [40]])
 # These are static obstacles we present to the robot
 obs = np.hstack((const_obs, const_obs2))
 N = len(roro)
-cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[]}
-a, ax1 = plt.subplots()
+cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[],'alpha_dotF1':0,'alpha_dotF2':0}
+a, ax1 = plt.subplots(figsize=(15,15))
 
 Top = 1
 
@@ -104,8 +109,9 @@ def get_form_cent(rbts):
 
 def get_angle(poses):
     
-    diff = poses[:,0] - poses[:,len(poses)-1]
-        
+    diff = poses[:,0] - poses[:,1]
+    """ print(poses)
+    print(poses[:,0],poses[:,1]) """
     angle = np.arctan2(diff[1],diff[0])
     return degrees(angle)
 
@@ -120,8 +126,15 @@ def check_goal_reached(Robots):
 
 def calc_vel(pres,prev,dt):
     rel_vel = np.divide(np.subtract(pres,prev),dt)
+    #print(rel_vel.shape)
+    return rel_vel*(np.pi/180)
 
+def calc_vel_c(pres,prev,dt):
+    rel_vel = np.divide(np.subtract(pres,prev),dt)
+    #print(rel_vel.shape)
     return rel_vel
+
+
 
 
 
@@ -141,7 +154,6 @@ def f_control(N,rbts,rbts1):
             cent['AF1'] = get_angle(get_pose(rbts))
             cent['AF2'] = get_angle(get_pose(rbts1))
 
-            #print(cent['cent_F2'])
             
             """ IF Id = 1 --> Only obstacle avoidance no formation control
             IF Id = 2 --> Only Formation control 
@@ -155,11 +167,26 @@ def f_control(N,rbts,rbts1):
             if tt>0:
 
 
-                rbts[i].robot_step(obs,roro,i,i,7,L2,weights_rec2,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'])
-                rbts1[i].robot_step(obs,roro1,i,i,7,L2,weights_rec2,e1,cent['cent_F1'],cent['AF1'],cent['rel_velF1'])
+
+
+                rbts[i].robot_step(obs,roro,i,i,7,L2,weights_rec2,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF2'])
+                rbts1[i].robot_step(obs,roro1,i,i,7,L2,weights_rec2,e1,cent['cent_F1'],cent['AF1'],cent['rel_velF1'],cent['alpha_dotF1'])
                 
-                cent['rel_velF1'] = calc_vel(get_form_cent(rbts),cent['cent_F1'],0.01)
-                cent['rel_velF2'] = calc_vel(get_form_cent(rbts1),cent['cent_F2'],0.01)
+                cent['rel_velF1'] = calc_vel_c(get_form_cent(rbts),cent['cent_F1'],0.01)
+                cent['rel_velF2'] = calc_vel_c(get_form_cent(rbts1),cent['cent_F2'],0.01)
+
+
+                #print((get_form_cent(rbts),cent['AF1']))
+
+                cent['alpha_dotF1'] = calc_vel_c(get_angle(get_pose(rbts)),cent['AF1'],0.01)
+                cent['alpha_dotF2'] = calc_vel_c(get_angle(get_pose(rbts1)),cent['AF2'],0.01)
+
+
+                #print('This is alpha1 dot: ',cent['alpha_dotF1'],'This is alpha2 dot: ',  cent['alpha_dotF2'])
+
+
+
+
 
             #print(cent['rel_velF1'])
             
@@ -183,3 +210,4 @@ def f_control(N,rbts,rbts1):
 if __name__ =="__main__":
 
     f_control(N,roro,roro1)
+    print("--- %s seconds ---" % (time.time() - start_time))
