@@ -25,11 +25,11 @@ L3 = np.array([
     [-1, -1, 3, -1],
     [-1, -1 , -1, 3]]) 
 # Tolerance
-e1 = 0.1
+e1 = 0.2
 e2 = 0.4
 # Formation Distance for rectangle shape
-Df_l = 3
-Df_b = 2
+Df_l = 2
+Df_b = 1
 
 ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 
@@ -105,13 +105,13 @@ def get_angle(poses):
 # Starting postion of our robots
 start = []
 #start.append(get_rob_gposes(np.array([0,0])))
-start.append(get_rob_rec_pos(np.array([2.5,2.5])))
+start.append(get_rob_rec_pos(np.array([0,0])))
 
 
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_turn_orient(np.array([20,20]))) # Turned Rectangle
+goal.append(get_rob_rec_pos(np.array([20,20]))) # Turned Rectangle
 
 #print('These are the starting postions of the robots',start)
 #print('These are goal position f the robots',goal)
@@ -144,7 +144,7 @@ Robot4 = Robot_Sim(x_init4, goal_init4,3)
 
 const_obs = np.array([[25], [35]])
 const_obs2 = np.array([[25], [35]])
-cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0}
+cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[],'alpha_dotF1':0,'alpha_dotF2':0}
 
 cent['cent_F1'] = np.array([10,10]).reshape(2,1)
 
@@ -164,7 +164,12 @@ def check_goal_reached(Robots):
             return True
         else:
             return False
+def calc_vel_c(pres,prev,dt):
+    rel_vel = np.divide(np.subtract(pres,prev),dt)
+    #print(rel_vel.shape)
+    return rel_vel
 
+gridlength = np.array([25,25])
 
 def f_control(N,rbts):
 
@@ -179,7 +184,7 @@ def f_control(N,rbts):
         r = 0
         for i in range(N):          
             #cent['cent_F1'] = get_form_cent(Robots1)
-            cent['cent_F2'] = np.array([10,10]).reshape(2,)
+            cent['cent_F2'] = np.array([5,5]).reshape(2,)
 
             #print(cent['cent_F2'])
             
@@ -195,16 +200,16 @@ def f_control(N,rbts):
             if tt>0:
 
 
-                rbts[i].robot_step(obs,roro,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],90)
+                rbts[i].robot_step(obs,roro,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],45,[0,0],0)
                 
-            
+                print(obs[0])
 
         if tt%50 ==0:
             print(tt)
             plt.cla()
 
             for robot in rbts:
-                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle)
+                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength)
             
             plt.pause(0.0001)
     for robot in rbts:

@@ -125,7 +125,7 @@ def f_control(N,rbts):
             if tt>0:
 
 
-                rbts[i].robot_step(obs,roro,i,i,8,L3,weights_rec3,e1,cent['cent_F2'],0)
+                rbts[i].robot_step(obs,roro,i,i,8,L3,weights_rec3,e1,cent['cent_F2'],0,[0,0],0)
                 
             
 

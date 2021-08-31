@@ -20,7 +20,7 @@ class Robot_Sim():
         self.p_fcentre = []
         self.n_fcentre = []
         self.angle = []
-        self.vel = []
+        self.vel = np.zeros([2,])
 
 
     # Calcute safe velocity for the robots and update its dynamics
@@ -36,10 +36,10 @@ class Robot_Sim():
         
         u_hat_acc = np.ndarray.flatten(np.array(u_hat_acc)) 
 
-        print('This is the Velocity',u_hat_acc)
-
+        #print('This is the Velocity',np.sqrt(np.power(u_hat_acc[0],2)+np.power(u_hat_acc[1],2) ))
+        #print('This the ustar: ',u_hat_acc)
         assert(u_hat_acc.shape == (2,))
-        
+        self.vel = u_hat_acc
 
         self.state = self.dyn.step(u_hat_acc)
         self.ecbf.state = self.state
@@ -47,7 +47,7 @@ class Robot_Sim():
         
         self.n_fcentre.append(centre.reshape(2,))
         self.angle.append(angle)
-        self.vel.append(u_hat_acc)
+        #self.vel.append(u_hat_acc)
 
         return u_hat_acc
 

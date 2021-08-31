@@ -14,8 +14,8 @@ start_time = time.time()
 e1 = 0.1
 e2 = 0.4
 # Formation Distance for rectangle shape
-Df_l = 3
-Df_b = 2
+Df_l = 2
+Df_b = 1
 
 ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 
@@ -45,8 +45,8 @@ weights_rec2 = np.array([
 #start.append(get_rob_gposes(np.array([0,0])))
 #start.append(get_rob_rec_pos(np.array([-3,-2])))
 #start.append((get_rob_rec_pos(np.array([25,25]))))
-start1,start2 = gen2(np.array([0,0]).reshape(2,))
-goal1,goal2 = gen2(np.array([20,0]).reshape(2,))
+start1,start2 = gen2(np.array([0,2]).reshape(2,))
+goal1,goal2 = gen2(np.array([20,2]).reshape(2,))
 start3,start4 = gen2(np.array([20,0]).reshape(2,))
 goal3,goal4 = gen2(np.array([0,0]).reshape(2,))
 # Goal positions of our robots
@@ -89,6 +89,7 @@ a, ax1 = plt.subplots(figsize=(15,15))
 
 Top = 1
 
+
 def get_pose(robots):
     '''
     Returns the position of robots
@@ -127,20 +128,23 @@ def check_goal_reached(Robots):
 def calc_vel(pres,prev,dt):
     rel_vel = np.divide(np.subtract(pres,prev),dt)
     #print(rel_vel.shape)
-    return rel_vel*(np.pi/180)
+    return rel_vel
 
 def calc_vel_c(pres,prev,dt):
     rel_vel = np.divide(np.subtract(pres,prev),dt)
     #print(rel_vel.shape)
-    return rel_vel
+    return rel_vel*(np.pi/180)
 
 
-
+gridlength = np.array([25,25])
 
 
 def f_control(N,rbts,rbts1):
 
     tt = 0
+    file = open("h.txt","w")
+
+    file.close()
     while not check_goal_reached(rbts):
 
         tt = tt +1
@@ -172,8 +176,10 @@ def f_control(N,rbts,rbts1):
                 rbts[i].robot_step(obs,roro,i,i,7,L2,weights_rec2,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF2'])
                 rbts1[i].robot_step(obs,roro1,i,i,7,L2,weights_rec2,e1,cent['cent_F1'],cent['AF1'],cent['rel_velF1'],cent['alpha_dotF1'])
                 
-                cent['rel_velF1'] = calc_vel_c(get_form_cent(rbts),cent['cent_F1'],0.01)
-                cent['rel_velF2'] = calc_vel_c(get_form_cent(rbts1),cent['cent_F2'],0.01)
+                cent['rel_velF1'] = calc_vel(get_form_cent(rbts),cent['cent_F1'],0.01)
+                cent['rel_velF2'] = calc_vel(get_form_cent(rbts1),cent['cent_F2'],0.01)
+
+                #print( 'These are centroids velocities',cent['rel_velF1'], cent['rel_velF2'])
 
 
                 #print((get_form_cent(rbts),cent['AF1']))
@@ -196,9 +202,9 @@ def f_control(N,rbts,rbts1):
             plt.cla()
 
             for robot in rbts12:
-                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle)
+                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength)
             
-            plt.pause(0.12)
+            plt.pause(0.00001)
 
     for robot in rbts12:
     

@@ -5,15 +5,16 @@ import numpy as np
 
 
 
-def plot_step(state_hist, plot_handle,new_obs,centre,angle):
+def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength):
     state_hist_plot = np.array(state_hist)
     centre_hist = np.array(centre)
     angle_hist = np.array(angle)
     #print(angle)
-    k = 25
+    k = gridlength[0]
+    p = gridlength[1]
 
     plot_handle.set_xlim([-k, k])
-    plot_handle.set_ylim([-k, k])
+    plot_handle.set_ylim([-p, p])
 
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1],'k')
     #plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
@@ -36,7 +37,7 @@ def plot_step(state_hist, plot_handle,new_obs,centre,angle):
         ell2.set_facecolor(np.array([1, 0, 0]))
 
     #print((centre_hist))
-    ell3 = Ellipse((centre_hist[-1, 0], centre_hist[-1, 1]), 6, 4, angle_hist[-1])
+    ell3 = Ellipse((centre_hist[-1, 0], centre_hist[-1, 1]), 3, 5, angle_hist[-1])
     #plot_handle.plot(centre_hist[:, 0],centre_hist[:, 1],'2k')
     ell3.set_alpha(0.3)
     ell3.set_facecolor(np.array([1, 0, 0]))

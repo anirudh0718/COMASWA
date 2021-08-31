@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 import time
 from cvxopt import matrix, solvers
 import functions
-
+import json
 K = 1
 # Laplacian matrix for a square/Rectangle shape with 4 robots|| Constarints for 2 and 4
 
-
+Use_nom = False
 
 # Class Defining our CBF control
 
@@ -88,10 +88,14 @@ class ebcf_control:
         P = np.array([[2, 0],[0, 2]])
         q = 2*self.compute_nom().reshape(2,)
 
-        print('This is the value of nominal',q)
+        #print('This is the value of nominal',q)
         h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot)
 
         self.h['h'].append(h)
+        
+        with open('h.txt','a') as f:
+            json.dump(h.tolist(),f)
+            f.write('\n')
         #print('this is h',h)
         #self.dist.append(functions.calc_dist(self.state,Robots,n,r,L))
 
@@ -99,9 +103,18 @@ class ebcf_control:
 
         #print('This is G', G)
         #exit()
-        
         sol = solve_qp(P,q,G,h)
         u_st = sol['x']
+        return u_st
+        
+        
+        """ if Use_nom:
+            
+            u_st = -self.compute_nom().reshape(2,)
+            return u_st
+        else:
+            print('Solver ')
+             """
 
         #print('This is h: ',h)
         """ try:
@@ -110,7 +123,7 @@ class ebcf_control:
         except ValueError:
             u_st = matrix([0,0])
             print('Robot {} failed'.format(i+1)) """
-        return u_st
+        
 
     # Creates respective arrays for h(x) values to be stored for plotting
     def create_h_arr(self):
@@ -140,6 +153,13 @@ class ebcf_control:
                 h_list[i][j] = self.h['h'][j][i]
         for i in range(len(h_list)):
             plt.plot(h_list[i])
+        """ with open('h.txt','w') as f:
+            for item in h_list:
+                f.write("%s\n"%item) """
+        #np.savetxt('test.out', h_list[i], delimiter=',')   # X is an array
+
+
+        
 
         if id ==2:
             d_list = self.create_d_arr()

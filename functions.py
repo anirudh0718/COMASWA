@@ -3,15 +3,25 @@ import matplotlib.pyplot as plt
 import time
 from cvxopt import matrix, solvers
 from numpy.lib import angle
-
+from math import radians
+import pylab
+from filterpy.kalman import ExtendedKalmanFilter
+from filterpy.common import Q_discrete_white_noise
 # Number of robots
 N = 4
 
+pylab.ion()
 
 Ds = 2
 
+a = 1.5
+b = 2.5
 
+Use_TVCBF = True
 
+start = time.time()
+
+count = 0
 
 def topological_neighbors(L, agent):
     """ Returns the neighbors of a particular agent using the graph Laplacian
@@ -58,6 +68,7 @@ def compute_hobs(obst,state):
 def compute_hf_g(state,Robots,n,r,L,weights,e):
     hf = np.zeros((len(topological_neighbors(L,n)), 1))
     idx = 0    
+    #print(topological_neighbors(L,n)+1)
     for j in topological_neighbors(L,n):
         sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
         xo = sub[0]
@@ -65,7 +76,7 @@ def compute_hf_g(state,Robots,n,r,L,weights,e):
             
         hf[idx]= (np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2)
         idx += 1
-
+    #print('This is the formation greater h for robot 1',hf)
     return hf
 # Compute hf for only lesser than inequality
 def compute_hf_l(state,Robots,n,r,L,weights,e):
@@ -81,57 +92,59 @@ def compute_hf_l(state,Robots,n,r,L,weights,e):
 
     return hf
 
+
+
 # Compute hf between formations
 
 def compute_hf_Form(state,a,b,t,centre,c_vel,a_dot):
-    #print('This is the elliptical centre: ',centre)
-    sub = np.atleast_2d(state["q"][:2]).T - centre.reshape(2,1)
 
-    xo = sub[0]
-    yo = sub[1]
-    xobs = -sub[0]
-    yobs = -sub[1]
-    xalphobs= np.power(xo,2)*((2/a**2)*(np.cos(t)*(-np.sin(t))) + (2/b**2)*np.sin(t)*(np.cos(t))) +np.power(yo,2)*((2/a**2)*(np.cos(t)*(np.sin(t))) - (2/b**2)*np.sin(t)*(np.cos(t))) + 2*xo*yo*(1/a**2 - 1/b**2)*(np.power(np.cos(t),2)-np.power(np.sin(t),2))
-
+    t = radians(t)
     if len(c_vel)>0:
         rel_vel = np.array([c_vel[0],c_vel[1]]).reshape(2,1)
     else:
         rel_vel=np.zeros((2,1))
-    
-    #print('relative velocity',rel_vel)
-    #print('relative velocity shape',rel_vel.shape)
-    r = np.array([1.5,1.5]).reshape(2,1)
-    #print(r.shape,rel_vel.shape)
-    alpha_dot = np.sqrt(np.power(rel_vel[0],2)+np.power(rel_vel[1],2))/1.5
-    #print(type(a_dot))
+
+    #centre = get_estimate(rel_vel,centre)
+
+    sub = np.atleast_2d(state["q"][:2]).T - centre.reshape(2,1)
+
+    xo = sub[0]
+    yo = sub[1]
+    xalphobs= ((np.power(xo,2))*( (2/(a**2))* (np.cos(t)*(-np.sin(t) ) ) + (2/ (b**2) )*np.sin(t)*(np.cos(t)))) + \
+                ((np.power(yo,2) )*((2/(a**2))*(np.cos(t)*(np.sin(t))) - (2/ (b**2) )*np.sin(t)*(np.cos(t)))) + \
+                2*xo*yo*(1/ (a**2) - 1/ (b**2))*(np.power(np.cos(t),2)-np.power(np.sin(t),2))
 
     
+    #rel_vel = np.array([1.2,1.2]).reshape(2,1)
+    alpha_dot = np.sqrt(np.power(rel_vel[0],2)+np.power(rel_vel[1],2))/1
 
     
-    #velocity_factor = xobs*vel[0] + yobs*vel[1]
-    #h =  np.power((xo*np.cos(t)-yo*np.sin(t)),2)/np.power(3,2) +  np.power((xo*np.sin(t)-yo*np.cos(t)),2)/np.power(2,2) - np.power(1,2) 
-    h = (np.power(np.cos(t),2)/a**2+ np.power(np.sin(t),2)/b**2)*(np.power(xo,2)) + (np.power(np.sin(t),2)/a**2+np.power(np.cos(t),2)/b**2)*(np.power(yo,2)) + 2*xo*yo*(1/a**2 - 1/b**2) - 1
-    """ for i in range(len(centre)):
-        #print('This is the obstacle {}'.format(i),obst[i, :].T.reshape(2,1))
-        #exit()
-        
-
-        
-        #h[i] = np.power(xo,2)/np.power(3,2)+ np.power(yo,2)/np.power(2,2) - np.power(1,2) 
-        h[i] =  """
-
-    #print('This is th value of h: ',h)
-    a =  xobs*rel_vel[0]
-    b = yobs*rel_vel[1]
-    c = xalphobs*alpha_dot
-    #print(alpha_dot.shape,xalphobs.shape)
-
-    #print(a,b,c)
-    h =  h  
-
+    h = (np.power(np.cos(t),2)/a**2+ np.power(np.sin(t),2)/b**2)*(np.power(xo,2)) + (np.power(np.sin(t),2)/a**2+np.power(np.cos(t),2)/b**2)*(np.power(yo,2)) + 2*np.cos(t)*np.sin(t)*xo*yo*(1/a**2 - 1/b**2) - 1
     
 
-    return 0.05*h
+    r,p = compute_G_F(state,a,b,centre,t)
+    a_obs =  -r*rel_vel[0]
+    b_obs = -p*rel_vel[1]
+    c_obs = xalphobs*alpha_dot
+
+    gamma = 1
+
+    if Use_TVCBF:
+        print('-------------------------TVCBF------------------')
+        print('This is the h value',h)
+        print('These are velocity terms a b c alphaddot', a_obs,b_obs,c_obs,alpha_dot)
+        h = gamma*h + (a_obs+b_obs+c_obs)
+
+        print('This is the h + a_obs+b_obs value',h)
+
+        pylab.plot(start,a_obs)
+        pylab.plot(start,b_obs)
+        pylab.plot(start,c_obs)
+    else:
+        h =  h  
+
+
+    return h
 
 # Compute h for only formation
 
@@ -151,11 +164,11 @@ def compute_hf_4(obs,state,Robots,n,r,L,weights,e,centre,angle):
 
 #Compute h for obs(centre) and Formation
 def compute_hf_7(obs,state,Robots,n,r,L,weights,e,centre,angle,c_vel,a_dot):
-    a = 1.2
-    vel_fac = np.array([a,a]).reshape(2,1)
+    g = 1.12
+    vel_fac = np.array([g,g]).reshape(2,1)
     #print((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre,c_vel),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
     #print((compute_hobs(obs,state).shape,compute_hf_Form(state,3,2,angle,centre,c_vel).shape,compute_hf_g(state,Robots,n,r,L,weights,e).shape,compute_hf_l(state,Robots,n,r,L,weights,e).shape,vel_fac.shape,vel_fac.shape))
-    com_h = np.vstack((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre,c_vel,a_dot),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
+    com_h = np.vstack((compute_hobs(obs,state),compute_hf_Form(state,a,b,angle,centre,c_vel,a_dot),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
     return com_h
 
 #Compute h for obs and Formation_greater case
@@ -198,9 +211,11 @@ def compute_Gf_4(obs,state,Robots,n,r,L,centre,angle):
 # Single Elliptical and obstacle
 
 def compute_Gf_7(obs,state,Robots,n,r,L,centre,angle):
+    angle = radians(angle)
     A = -2*compute_A_obs(state,obs)
     Af = compute_Gf(state,Robots,n,r,L)
-    AF = compute_A_F(state,3,2,centre,angle)
+    AF = compute_A_F(state,a,b,centre,angle)
+    #print('This is G for formation avoidance', AF)
     A1 = np.identity((2))
     
     A2 = -A1
@@ -242,8 +257,8 @@ def compute_A_F(state,a,b,centre,alpha):
 
     
 
-    r = 2*xo *(((np.cos(alpha))**2/a**2)+((np.sin(alpha))**2/b**2)) + 2*yo*(1/a**2 - 1/b**2)
-    p = 2*yo*(((np.sin(alpha))**2/a**2) + ((np.cos(alpha))**2/b**2))+ 2*xo*(1/a**2 - 1/b**2)
+    r = 2*xo *(( ((np.cos(alpha))**2) / (a**2) ) + (( (np.sin(alpha))**2) / (b**2))) + 2*np.cos(alpha)*np.sin(alpha)*yo*(1/a**2 - 1/b**2)
+    p = 2*yo*(( ( (np.sin(alpha) )**2)/(a**2) )  + (( (np.cos(alpha)) **2)/ (b**2) ))+ 2*np.cos(alpha)*np.sin(alpha)*xo*(1/a**2 - 1/b**2)
 
 
 
@@ -253,6 +268,19 @@ def compute_A_F(state,a,b,centre,alpha):
                   
         
     return A
+def compute_G_F(state,a,b,centre,alpha):
+    A = np.empty((0,2))
+
+    sub = np.atleast_2d(state["q"][:2]).T - centre.reshape(2,1)
+    xo = sub[0]
+    yo = sub[1]
+
+    
+
+    r = 2*xo *(( ((np.cos(alpha))**2) / (a**2) ) + (( (np.sin(alpha))**2) / (b**2))) + 2*np.cos(alpha)*np.sin(alpha)*yo*(1/a**2 - 1/b**2)
+    p = 2*yo*(( ( (np.sin(alpha) )**2)/(a**2) )  + (( (np.cos(alpha)) **2)/ (b**2) ))+ 2*np.cos(alpha)*np.sin(alpha)*xo*(1/a**2 - 1/b**2)
+
+    return r,p
 # Compute G for Formation
 def compute_Af(state,Robots,n,r,L):
     A = np.empty((0,2))

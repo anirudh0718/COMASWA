@@ -27,3 +27,51 @@ ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))
 
 xo = 2*sub[0]*(np.power(np.cos(t),2)/a**2+ np.power(np.sin(t),2)/b**2) + 2*sub[1]*(1/a**2 - 1/b**2)
     yo = 2*sub[1]*(np.power(np.sin(t),2)/a**2+np.power(np.cos(t),2)/b**2) + 2*sub[0]*(1/a**2 - 1/b**2)
+
+
+
+# Compute hf for only greater than inequality
+
+def compute_hf_g(state,Robots,n,r,L,weights,e):
+    hf = np.zeros((len(topological_neighbors(L,n)), 1))
+    idx = 0    
+    gamma = 1
+    #print(topological_neighbors(L,n)+1)
+    for j in topological_neighbors(L,n):
+        sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
+        xo = sub[0]
+        yo = sub[1]
+            
+        
+        if Use_TVCBF:
+
+            x_j_dot = -xo*Robots[j].vel[0]
+            y_j_dot = -yo*Robots[j].vel[1]
+            
+            hf[idx]= gamma*((np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2)) + x_j_dot + y_j_dot
+        else:
+            hf[idx]= gamma*((np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2))
+        idx += 1
+
+    #print('This is the formation greater h for robot 1',hf)
+    return hf
+# Compute hf for only lesser than inequality
+def compute_hf_l(state,Robots,n,r,L,weights,e):
+    hf = np.zeros((len(topological_neighbors(L,n)), 1))
+    idx = 0
+    for j in topological_neighbors(L,n):
+        sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
+        xo = sub[0]
+        yo = sub[1]
+            #print(xo,yo)
+        if Use_TVCBF:
+
+            x_j_dot = -xo*Robots[j].vel[0]
+            y_j_dot = -yo*Robots[j].vel[1]
+            
+            hf[idx]= (np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2) + x_j_dot + y_j_dot
+        else:
+            hf[idx]= (np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2)
+        idx += 1
+
+    return hf
