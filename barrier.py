@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import time
 from cvxopt import matrix, solvers
 import functions
-import json
+import json,csv
 K = 1
 # Laplacian matrix for a square/Rectangle shape with 4 robots|| Constarints for 2 and 4
 
@@ -20,6 +20,7 @@ class ebcf_control:
         self.id = id
 
         self.dist = []
+        self.vel = []
     
     # Compute h for the chosen case wrt to id provided
     def compute_h(self,obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot):
@@ -92,11 +93,12 @@ class ebcf_control:
         h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot)
 
         self.h['h'].append(h)
-        
-        with open('h.txt','a') as f:
+        file = open('h{}{}.txt'.format(n,r),'a')
+        file_v = open('v{}{}.txt'.format(n,r),'a')
+        with open('h{}{}.txt'.format(n,r),'a') as f:
             json.dump(h.tolist(),f)
             f.write('\n')
-        #print('this is h',h)
+        print('this is h',h)
         #self.dist.append(functions.calc_dist(self.state,Robots,n,r,L))
 
         G = self.compute_G(obs,Robots,n,r,id,L,centre,angle)
@@ -105,6 +107,10 @@ class ebcf_control:
         #exit()
         sol = solve_qp(P,q,G,h)
         u_st = sol['x']
+        vel = np.ndarray.flatten(np.array(u_st)) 
+        with open('v{}{}.txt'.format(n,r),'a') as f:
+            json.dump(vel.tolist(),f)
+            f.write('\n')
         return u_st
         
         

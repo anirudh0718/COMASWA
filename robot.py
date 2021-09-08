@@ -5,7 +5,7 @@ from barrier import ebcf_control
 
 
 class Robot_Sim():
-    def __init__(self, x_init, goal_init, robot_id):
+    def __init__(self, x_init, goal_init, robot_id,id):
         self.id = robot_id
         self.state = {"q": x_init
                 }
@@ -21,6 +21,7 @@ class Robot_Sim():
         self.n_fcentre = []
         self.angle = []
         self.vel = np.zeros([2,])
+        self.form_id =id
 
 
     # Calcute safe velocity for the robots and update its dynamics

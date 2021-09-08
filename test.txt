@@ -75,3 +75,36 @@ def compute_hf_l(state,Robots,n,r,L,weights,e):
         idx += 1
 
     return hf
+
+    ----------------------------------------------------------------------------------------------
+
+    # Compute hf for only greater than inequality
+
+def compute_hf_g(state,Robots,n,r,L,weights,e):
+    hf = np.zeros((len(topological_neighbors(L,n)), 1))
+    idx = 0    
+    #print(topological_neighbors(L,n)+1)
+    for j in topological_neighbors(L,n):
+        sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
+        xo = sub[0]
+        yo = sub[1]
+            
+        hf[idx]= (np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2)
+        idx += 1
+    #print('This is the formation greater h for robot 1',hf)
+    return hf
+# Compute hf for only lesser than inequality
+def compute_hf_l(state,Robots,n,r,L,weights,e):
+    hf = np.zeros((len(topological_neighbors(L,n)), 1))
+    idx = 0
+    for j in topological_neighbors(L,n):
+        sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
+        xo = sub[0]
+        yo = sub[1]
+            #print(xo,yo)
+        hf[idx]= np.power(weights[n,j] + e,2) - (np.power(xo,2)+ np.power(yo,2))
+        idx += 1
+
+    return hf
+
+

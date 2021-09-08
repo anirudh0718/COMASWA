@@ -5,20 +5,26 @@ import numpy as np
 
 
 
-def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength):
+def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength,goal,id,time):
     state_hist_plot = np.array(state_hist)
     centre_hist = np.array(centre)
     angle_hist = np.array(angle)
     #print(angle)
     k = gridlength[0]
     p = gridlength[1]
-
+    time_str = 'RUNTIME: '+str(time)+' SECS'
+    text_kwargs = dict(ha='center', va='center', fontsize=12, color='C1')
     plot_handle.set_xlim([-k, k])
     plot_handle.set_ylim([-p, p])
+    plot_handle.plot(goal[0], goal[1], color='green', marker='x')
 
+    g = plot_handle.annotate('',(-20,23),**text_kwargs)
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1],'k')
     #plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
-    plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
+    if id == 1:
+        plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], marker='s',markersize=6) # current
+    else:
+        plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], marker=(8, 0),markersize =6) # current
 
     """ plot_handle.plot(centre_hist[:, 0], centre_hist[:, 1],'k')
     #plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
@@ -44,6 +50,11 @@ def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength):
     
     #plot_handle.add_artist(ell)
     #plot_handle.add_artist(ell2)
-    plot_handle.add_artist(ell3)
+    #plot_handle.add_artist(ell3)
     #plot_handle.axis('equal')
+
+    annotate(g,time_str)
     
+
+def annotate(a,x):
+    a.set_text(x)

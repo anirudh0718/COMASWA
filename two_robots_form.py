@@ -58,22 +58,22 @@ goal = []
 #Robot 1
 x_init1 = start1
 goal_init1 =goal1
-robot1 = Robot_Sim(x_init1, goal_init1, 0)
+robot1 = Robot_Sim(x_init1, goal_init1, 0,1)
 
 #Robot 2
 x_init2 = start2
 goal_init2 =goal2
-robot2 = Robot_Sim(x_init2, goal_init2, 1)
+robot2 = Robot_Sim(x_init2, goal_init2, 1,1)
 
 #Robot 3
 x_init3 = start3
 goal_init3 =goal3
-robot3 = Robot_Sim(x_init3, goal_init3, 2)
+robot3 = Robot_Sim(x_init3, goal_init3, 2,2)
 
 #Robot 4
 x_init4 = start4
 goal_init4 =goal4
-robot4 = Robot_Sim(x_init4, goal_init4, 3)
+robot4 = Robot_Sim(x_init4, goal_init4, 3,2)
 
 roro = [robot1,robot2]
 roro1 = [robot3,robot4]
@@ -85,7 +85,7 @@ const_obs2 = np.array([[30], [40]])
 obs = np.hstack((const_obs, const_obs2))
 N = len(roro)
 cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[],'alpha_dotF1':0,'alpha_dotF2':0}
-a, ax1 = plt.subplots(figsize=(15,15))
+a, ax1 = plt.subplots(figsize=(15,15))#constrained_layout=True)
 
 Top = 1
 
@@ -202,7 +202,7 @@ def f_control(N,rbts,rbts1):
             plt.cla()
 
             for robot in rbts12:
-                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength)
+                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,robot.goal,robot.form_id,round(time.time() - start_time,2))
             
             plt.pause(0.00001)
 

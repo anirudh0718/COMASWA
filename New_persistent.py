@@ -37,6 +37,13 @@ LPR = np.array([
     [-1, 3, -1, 0],
     [-1, 0, 3, 0],
     [0, -1 , -1, 2]]) 
+
+
+LPR2 = np.array([
+    [2, -1, -1, 0],
+    [0, 3, 0, -1],
+    [-1, 0, 3, -1],
+    [0, -1 , 0, 2]]) 
 # Tolerance
 e1 = 0.05
 e2 = 0.4
@@ -79,6 +86,12 @@ weights_PR = np.array([
     [Df_l, 0, ddiag_rec, Df_b],
     [Df_b, 0, 0, 0],
     [0, Df_b,Df_l, 0]
+])
+weights_PR2 = np.array([
+    [0, Df_l,Df_b,ddiag_rec],
+    [0, 0, 0, Df_b],
+    [Df_b, 0, 0, Df_l],
+    [0, Df_b,0, 0]
 ])
 # Formation Distance for square shape
 Df = 2
@@ -123,14 +136,14 @@ def get_angle(poses):
 # Starting postion of our robots
 start = []
 #start.append(get_rob_gposes(np.array([0,0])))
-start.append(get_rob_rec_pos(np.array([20,20])))
-start.append((get_rob_rec_pos(np.array([10,0]))))
+start.append(get_rob_rec_pos(np.array([0,0])))
+start.append((get_rob_rec_pos(np.array([10,2]))))
 
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_rob_rec_pos(np.array([0,2]))) # Turned Rectangle
-goal.append(get_rob_rec_pos(np.array([0,0])))
+goal.append(get_rob_rec_pos(np.array([10,0]))) # Turned Rectangle
+goal.append(get_rob_rec_pos(np.array([0,2])))
 
 #print('These are the starting postions of the robots',start)
 #print('These are goal position f the robots',goal)
@@ -246,12 +259,17 @@ def calc_velrad(pres,prev,dt):
 
 gridlength = np.array([25,25])
 
-
+def clear_data():
+    for i in range(4):
+        for j in range(2):
+            #print(i,j)
+            file_h = open("h{}{}.txt".format(i,j),"w")
+            file_v = open("v{}{}.txt".format(i,j),"w")
+            file_h.close()
+            file_v.close
 def f_control(N,rbts):
 
-    file = open("h.txt","w")
-
-    file.close()
+    
 
     tt = 0
     while not check_goal_reached(rbts):
@@ -288,8 +306,8 @@ def f_control(N,rbts):
             IF Id = 8 --> Only ellipticalobstacle avoidance
             Formation greater case = |xi -xj| - (Df - e) > 0"""
             if tt>0:
-                #Robots1[i].robot_step(obs,Robots1,i,i,7,LPR,weights_PR,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF1'])
-                Robots2[i].robot_step(obs,Robots2,i,i,7,LPR,weights_PR,e1,cent['cent_F1'],cent['AF1'], cent['rel_velF1'],cent['alpha_dotF2'])
+                Robots1[i].robot_step(obs,Robots1,i,i,7,LPR,weights_PR,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF1'])
+                Robots2[i].robot_step(obs,Robots2,i,i,7,LPR2,weights_PR2,e1,cent['cent_F1'],cent['AF1'], cent['rel_velF1'],cent['alpha_dotF2'])
 
                 cent['rel_velF1'] = calc_vel(get_form_cent(Robots1),cent['cent_F1'],0.01)
                 cent['rel_velF2'] = calc_vel(get_form_cent(Robots2),cent['cent_F2'],0.01)
@@ -309,11 +327,11 @@ def f_control(N,rbts):
             print(tt)
             plt.cla()
 
-            for robot in Robots2:
+            for robot in rbts:
                 plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength)
             
             plt.pause(0.000001)
-    for robot in Robots2:
+    for robot in rbts:
     
         robot.ecbf.new_plt_h(1)
         #robot.ecbf.dist_plot()

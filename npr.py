@@ -4,12 +4,11 @@ from plotrob import plot_step
 import  matplotlib.pyplot as plt
 from FC_to_Goal import get_rob_gposes,get_pose,get_rob_rec_pos,get_turned_rec,get_turn_orient
 from math import degrees
-import time
 
-start_time = time.time()
+Df_l = 2
+Df_b = 1
 
-
-
+ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 # Define the laplacian and weights for SQUARE AND RECTANGLE
 L2 = np.array([
     [2, -1, 0, -1],
@@ -37,18 +36,35 @@ LR = np.array([
     [-1, 0 , -1, 2]]) 
 
 LPR = np.array([
-    [2, -1, -1, 0],
-    [-1, 3, -1, -1],
+    [2, 0, -1, 0],
+    [-1, 3, -1, 0],
+    [-1, 0, 3, 0],
+    [-1, -1 , -1, 2]]) 
+
+
+LPR2 = np.array([
+    [2, -1, 0, -1],
+    [0, 3, 0, -1],
     [-1, -1, 3, -1],
-    [0, -1 , -1, 2]]) 
+    [0, -1 , 0, 2]]) 
+
+weights_PR = np.array([
+    [0, 0,Df_b,0],
+    [Df_l, 0, ddiag_rec, 0],
+    [Df_b, 0, 0, 0],
+    [ddiag_rec, Df_b,Df_l, 0]
+])
+weights_PR2 = np.array([
+    [0, Df_l,0,ddiag_rec],
+    [0, 0, 0, Df_b],
+    [Df_b, ddiag_rec, 0, Df_l],
+    [0, Df_b,0, 0]
+])
 # Tolerance
-e1 = 0.1
+e1 = 0.05
 e2 = 0.4
 # Formation Distance for rectangle shape
-Df_l = 2
-Df_b = 1
 
-ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 
 weights_rec2 = np.array([
     [0, Df_b,0,Df_l],
@@ -78,12 +94,7 @@ weights_recring = np.array([
     [Df_l, 0,Df_b, 0]
 ])
 
-weights_PR = np.array([
-    [0, Df_l,Df_b,0],
-    [Df_l, 0, ddiag_rec, Df_b],
-    [Df_b, ddiag_rec, 0, Df_l],
-    [0, Df_b,Df_l, 0]
-])
+
 # Formation Distance for square shape
 Df = 2
 d_minus_epi = Df
@@ -128,13 +139,13 @@ def get_angle(poses):
 start = []
 #start.append(get_rob_gposes(np.array([0,0])))
 start.append(get_rob_rec_pos(np.array([0,0])))
-start.append((get_rob_rec_pos(np.array([10,10]))))
+start.append((get_rob_rec_pos(np.array([10,2]))))
 
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_rob_rec_pos(np.array([20,20]))) # Turned Rectangle
-goal.append(get_rob_rec_pos(np.array([0,3])))
+goal.append(get_rob_rec_pos(np.array([10,0]))) # Turned Rectangle
+goal.append(get_rob_rec_pos(np.array([0,2])))
 
 #print('These are the starting postions of the robots',start)
 #print('These are goal position f the robots',goal)
@@ -143,27 +154,27 @@ goal.append(get_rob_rec_pos(np.array([0,3])))
 # Inititate our robots
 
 #Robot 1
-x_init1 = start[0][0]
-goal_init1 =goal[0][0]
-robot1 = Robot_Sim(x_init1, goal_init1, 0,1)
+x_init1 = start[0][1]
+goal_init1 =goal[0][1]
+robot1 = Robot_Sim(x_init1, goal_init1, 0)
 
 ### Robot 2
 
-x_init2 = start[0][1]
-goal_init2 =goal[0][1]
-Robot2 = Robot_Sim(x_init2, goal_init2,1,1)
+x_init2 = start[0][2]
+goal_init2 =goal[0][2]
+Robot2 = Robot_Sim(x_init2, goal_init2,1)
 
 ### Robot 3
 
-x_init3 = start[0][2]
-goal_init3 =goal[0][2]
-Robot3 = Robot_Sim(x_init3, goal_init3,2,1)
+x_init3 = start[0][0]
+goal_init3 =goal[0][0]
+Robot3 = Robot_Sim(x_init3, goal_init3,2)
 
 ### Robot 4
 
 x_init4 = start[0][3]
 goal_init4 =goal[0][3]
-Robot4 = Robot_Sim(x_init4, goal_init4,3,1)
+Robot4 = Robot_Sim(x_init4, goal_init4,3)
 
 
 
@@ -172,27 +183,27 @@ Robot4 = Robot_Sim(x_init4, goal_init4,3,1)
 #Formation 2
 
 #Robot 1
-x_init21 = start[1][0]
-goal_init21 =goal[1][0]
-robot21 = Robot_Sim(x_init21, goal_init21, 4,2)
+x_init21 = start[1][1]
+goal_init21 =goal[1][1]
+robot21 = Robot_Sim(x_init21, goal_init21, 4)
 
 ### Robot 2
 
-x_init22 = start[1][1]
-goal_init22 =goal[1][1]
-Robot22 = Robot_Sim(x_init22, goal_init22,5,2)
+x_init22 = start[1][2]
+goal_init22 =goal[1][2]
+Robot22 = Robot_Sim(x_init22, goal_init22,5)
 
 ### Robot 3
 
-x_init23 = start[1][2]
-goal_init23 =goal[1][2]
-Robot23 = Robot_Sim(x_init23, goal_init23,6,2)
+x_init23 = start[1][0]
+goal_init23 =goal[1][0]
+Robot23 = Robot_Sim(x_init23, goal_init23,6)
 
 ### Robot 4
 
 x_init24 = start[1][3]
 goal_init24 =goal[1][3]
-Robot24 = Robot_Sim(x_init24, goal_init24,7,2)
+Robot24 = Robot_Sim(x_init24, goal_init24,7)
 
 """ const_obs = np.array([[13], [10]])
 const_obs2 = np.array([[13], [22]]) """
@@ -258,10 +269,10 @@ def clear_data():
             file_v = open("v{}{}.txt".format(i,j),"w")
             file_h.close()
             file_v.close
-
 def f_control(N,rbts):
-    clear_data()
-    #exit()
+
+    
+
     tt = 0
     while not check_goal_reached(rbts):
 
@@ -297,13 +308,13 @@ def f_control(N,rbts):
             IF Id = 8 --> Only ellipticalobstacle avoidance
             Formation greater case = |xi -xj| - (Df - e) > 0"""
             if tt>0:
-                Robots1[i].robot_step(obs,Robots1,i,0,7,L3,weights_rec3,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF1'])
-                Robots2[i].robot_step(obs,Robots2,i,1,7,L3,weights_rec3,e1,cent['cent_F1'],cent['AF1'], cent['rel_velF1'],cent['alpha_dotF2'])
+                Robots1[i].robot_step(obs,Robots1,i,i,7,LPR,weights_PR,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF1'])
+                Robots2[i].robot_step(obs,Robots2,i,i,7,LPR2,weights_PR2,e1,cent['cent_F1'],cent['AF1'], cent['rel_velF1'],cent['alpha_dotF2'])
 
                 cent['rel_velF1'] = calc_vel(get_form_cent(Robots1),cent['cent_F1'],0.01)
                 cent['rel_velF2'] = calc_vel(get_form_cent(Robots2),cent['cent_F2'],0.01)
 
-                #print('These velocities of the foramtion',cent['rel_velF1'],cent['rel_velF2'])
+                print('These velocities of the foramtion',cent['rel_velF1'],cent['rel_velF2'])
                 cent['alpha_dotF1'] = calc_velrad(get_angle(get_pose(Robots1)),cent['AF1'],0.01)
                 cent['alpha_dotF2'] = calc_velrad(get_angle(get_pose(Robots2)),cent['AF2'],0.01)
                 
@@ -319,11 +330,10 @@ def f_control(N,rbts):
             plt.cla()
 
             for robot in rbts:
-                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,robot.goal,robot.form_id,round(time.time() - start_time,2))
+                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength)
             
             plt.pause(0.000001)
     for robot in rbts:
-        
     
         robot.ecbf.new_plt_h(1)
         #robot.ecbf.dist_plot()

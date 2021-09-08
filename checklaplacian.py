@@ -43,5 +43,5 @@ weights_PR = np.array([
     [Df_b, 0, 0, 0],
     [0, Df_b,Df_l, 0]
 ])
-print(topological_neighbors(LPR,3)+1)
+print(topological_neighbors(LPR,0)+1)
 print(weights_PR[0,2])

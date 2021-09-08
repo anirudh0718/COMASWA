@@ -7,8 +7,9 @@ from math import radians
 import pylab
 from filterpy.kalman import ExtendedKalmanFilter
 from filterpy.common import Q_discrete_white_noise
+import csv
 # Number of robots
-N = 4
+N = 410
 
 pylab.ion()
 
@@ -17,8 +18,8 @@ Ds = 2
 a = 1.5
 b = 2.5
 
-Use_TVCBF = True
-
+Use_TVCBF = False
+Use_TVCBF_F = False
 start = time.time()
 
 count = 0
@@ -68,14 +69,27 @@ def compute_hobs(obst,state):
 def compute_hf_g(state,Robots,n,r,L,weights,e):
     hf = np.zeros((len(topological_neighbors(L,n)), 1))
     idx = 0    
+    gamma = 1
     #print(topological_neighbors(L,n)+1)
     for j in topological_neighbors(L,n):
         sub =  state['q'][:2].reshape(2,1) - Robots[j].state['q'][:2].reshape(2,1)
         xo = sub[0]
         yo = sub[1]
             
-        hf[idx]= (np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2)
-        idx += 1
+        
+        if Use_TVCBF_F:
+
+            print('----------------------------TVCBF FOR FORMATION CONTROL---------------------------------')
+
+            x_j_dot = -xo*Robots[j].vel[0]
+            y_j_dot = -yo*Robots[j].vel[1]
+            
+            hf[idx]= gamma*((np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2)) + x_j_dot + y_j_dot
+            idx += 1
+        else:
+            hf[idx]= gamma*((np.power(xo,2)+ np.power(yo,2)) - np.power(weights[n,j] - e,2))
+            idx += 1
+
     #print('This is the formation greater h for robot 1',hf)
     return hf
 # Compute hf for only lesser than inequality
@@ -87,13 +101,18 @@ def compute_hf_l(state,Robots,n,r,L,weights,e):
         xo = sub[0]
         yo = sub[1]
             #print(xo,yo)
-        hf[idx]= np.power(weights[n,j] + e,2) - (np.power(xo,2)+ np.power(yo,2))
-        idx += 1
+        if Use_TVCBF_F:
+            print('----------------------------TVCBF FOR FORMATION CONTROL---------------------------------')
+            x_j_dot = -xo*Robots[j].vel[0]
+            y_j_dot = -yo*Robots[j].vel[1]
+            
+            hf[idx]= np.power(weights[n,j] + e,2) - (np.power(xo,2)+ np.power(yo,2)) + x_j_dot + y_j_dot
+            idx += 1
+        else:
+            hf[idx]= np.power(weights[n,j] + e,2) - (np.power(xo,2)+ np.power(yo,2))
+            idx += 1
 
     return hf
-
-
-
 # Compute hf between formations
 
 def compute_hf_Form(state,a,b,t,centre,c_vel,a_dot):
@@ -128,12 +147,13 @@ def compute_hf_Form(state,a,b,t,centre,c_vel,a_dot):
     c_obs = xalphobs*alpha_dot
 
     gamma = 1
+    pow = 1
 
     if Use_TVCBF:
         print('-------------------------TVCBF------------------')
         print('This is the h value',h)
         print('These are velocity terms a b c alphaddot', a_obs,b_obs,c_obs,alpha_dot)
-        h = gamma*h + (a_obs+b_obs+c_obs)
+        h = gamma*np.power(h,pow) + (a_obs+b_obs+c_obs)
 
         print('This is the h + a_obs+b_obs value',h)
 
@@ -164,7 +184,7 @@ def compute_hf_4(obs,state,Robots,n,r,L,weights,e,centre,angle):
 
 #Compute h for obs(centre) and Formation
 def compute_hf_7(obs,state,Robots,n,r,L,weights,e,centre,angle,c_vel,a_dot):
-    g = 1.12
+    g =2
     vel_fac = np.array([g,g]).reshape(2,1)
     #print((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre,c_vel),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
     #print((compute_hobs(obs,state).shape,compute_hf_Form(state,3,2,angle,centre,c_vel).shape,compute_hf_g(state,Robots,n,r,L,weights,e).shape,compute_hf_l(state,Robots,n,r,L,weights,e).shape,vel_fac.shape,vel_fac.shape))
