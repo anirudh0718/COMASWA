@@ -108,3 +108,56 @@ def compute_hf_l(state,Robots,n,r,L,weights,e):
     return hf
 
 
+
+def compute_A_far(self,obst):
+            A = np.empty((0,2))
+
+            #print('This is obst',obst[0,:])
+
+            #print('This is the shape', obst.shape)
+            #exit()
+
+            for i in range(obst.shape[1]):
+                
+                sub = np.atleast_2d(self.state["q"][:2]).T - obst[i, :].T.reshape(2,1)
+                xo = sub[0]
+                yo = sub[1]
+
+                atmp = np.array([np.hstack((xo, yo))])
+                A =np.array(np.vstack((A,atmp)))
+            return A
+
+    def compute_h_far(self,obst):
+        h = np.zeros((obst.shape[1], 1))
+        for i in range(obst.shape[1]):
+            sub = np.atleast_2d(self.state["q"][:2]).T - obst[i, :].T.reshape(2,1)
+            xo = sub[0]
+            yo = sub[1]
+            h[i] = np.power(xo,2)+ np.power(yo,2)- np.power(Ds-e,2) 
+        return h
+
+
+    def compute_safe_f(self,obs,u):
+        A = self.compute_A_far(obs)
+        h = self.compute_h_far(obs)
+
+        
+
+        P = np.array([[2, 0],[0, 2]])
+        G = -2*A
+        """ print('This is u nom',self.compute_nom())
+        exit() """
+        q = -2*u
+        #print('This is q',q)
+
+        #print(A.shape,h.shape,P.shape,G.shape,q.shape)
+
+        #exit()
+        #self.h['h'].append(h)
+        print(G,q)
+        
+        sol = solve_qp(P,q,G,h)
+
+        u_st = sol['x']
+
+        return u_st

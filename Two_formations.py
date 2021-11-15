@@ -42,11 +42,11 @@ LPR = np.array([
     [-1, -1, 3, -1],
     [0, -1 , -1, 2]]) 
 # Tolerance
-e1 = 0.1
+e1 = 0.03
 e2 = 0.4
 # Formation Distance for rectangle shape
-Df_l = 2
-Df_b = 1
+Df_l = 0.5
+Df_b = 0.25
 
 ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 
@@ -127,14 +127,14 @@ def get_angle(poses):
 # Starting postion of our robots
 start = []
 #start.append(get_rob_gposes(np.array([0,0])))
-start.append(get_rob_rec_pos(np.array([0,0])))
-start.append((get_rob_rec_pos(np.array([10,10]))))
+start.append(get_rob_rec_pos(np.array([-1.4,-0.5])))
+start.append((get_rob_rec_pos(np.array([0.5,1]))))
 
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_rob_rec_pos(np.array([20,20]))) # Turned Rectangle
-goal.append(get_rob_rec_pos(np.array([0,3])))
+goal.append(get_rob_rec_pos(np.array([0.5,1.4]))) # Turned Rectangle
+goal.append(get_rob_rec_pos(np.array([-1.4,-0.8])))
 
 #print('These are the starting postions of the robots',start)
 #print('These are goal position f the robots',goal)
@@ -197,8 +197,8 @@ Robot24 = Robot_Sim(x_init24, goal_init24,7,2)
 """ const_obs = np.array([[13], [10]])
 const_obs2 = np.array([[13], [22]]) """
 
-const_obs = np.array([[25], [35]])
-const_obs2 = np.array([[25], [35]])
+const_obs = np.array([[5], [4]])
+const_obs2 = np.array([[5], [4]])
 
 form = np.array([[60], [60]])
 
@@ -248,16 +248,16 @@ def calc_velrad(pres,prev,dt):
     #print(rel_vel.shape)
     return rel_vel*(np.pi/180)
 
-gridlength = np.array([25,25])
+gridlength = np.array([3,2.5])
 
 def clear_data():
     for i in range(4):
         for j in range(2):
             #print(i,j)
-            file_h = open("h{}{}.txt".format(i,j),"w")
-            file_v = open("v{}{}.txt".format(i,j),"w")
+            file_h = open("h{}{}".format(i,j)+'2Form'+'.csv',"w")
+            #file_v = open("v{}{}.csv".format(i,j),"w")
             file_h.close()
-            file_v.close
+            #file_v.close
 
 def f_control(N,rbts):
     clear_data()
@@ -322,10 +322,7 @@ def f_control(N,rbts):
                 plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,robot.goal,robot.form_id,round(time.time() - start_time,2))
             
             plt.pause(0.000001)
-    for robot in rbts:
-        
     
-        robot.ecbf.new_plt_h(1)
         #robot.ecbf.dist_plot()
     
 if __name__ =="__main__":

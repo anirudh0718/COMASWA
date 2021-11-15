@@ -2,9 +2,10 @@ import numpy as np
 from robot import Robot_Sim
 from plotrob import plot_step
 import  matplotlib.pyplot as plt
-from FC_to_Goal import get_rob_gposes,get_pose,get_rob_rec_pos,get_turned_rec,get_turn_orient
+import time
+from FC_to_Goal import get_rob_gposes,get_pose,get_rob_rec_pos,get_turned_rec,get_turn_orient,get_rob_rec_pos_ros
 
-
+start_time = time.time()
 # Define the laplacian and weights for SQUARE AND RECTANGLE
 L2 = np.array([
     [2, -1, 0, -1],
@@ -25,11 +26,11 @@ L3 = np.array([
     [-1, -1, 3, -1],
     [-1, -1 , -1, 3]]) 
 # Tolerance
-e1 = 0.2
+e1 = 0.03
 e2 = 0.4
 # Formation Distance for rectangle shape
-Df_l = 2
-Df_b = 1
+Df_l = 0.5
+Df_b = 0.25
 
 ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 
@@ -89,29 +90,16 @@ def get_angle(poses):
     angle = np.arctan2(diff[1],diff[0])
     return angle
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Starting postion of our robots
 start = []
 #start.append(get_rob_gposes(np.array([0,0])))
-start.append(get_rob_rec_pos(np.array([0,0])))
+start.append(get_rob_rec_pos_ros(np.array([-1.8,-0.6])))
 
 
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_rob_rec_pos(np.array([20,20]))) # Turned Rectangle
+goal.append(get_turn_orient(np.array([1.4,-0.2]))) # Turned Rectangle
 
 #print('These are the starting postions of the robots',start)
 #print('These are goal position f the robots',goal)
@@ -122,28 +110,30 @@ goal.append(get_rob_rec_pos(np.array([20,20]))) # Turned Rectangle
 #Robot 1
 x_init1 = start[0][0]
 goal_init1 =goal[0][0]
-robot1 = Robot_Sim(x_init1, goal_init1, 0)
+robot1 = Robot_Sim(x_init1, goal_init1, 0,0)
 
 ### Robot 2
 
 x_init2 = start[0][1]
 goal_init2 =goal[0][1]
-Robot2 = Robot_Sim(x_init2, goal_init2,1)
+Robot2 = Robot_Sim(x_init2, goal_init2,1,0)
 
 ### Robot 3
 
 x_init3 = start[0][2]
 goal_init3 =goal[0][2]
-Robot3 = Robot_Sim(x_init3, goal_init3,2)
+Robot3 = Robot_Sim(x_init3, goal_init3,2,0)
 
 ### Robot 4
 
 x_init4 = start[0][3]
 goal_init4 =goal[0][3]
-Robot4 = Robot_Sim(x_init4, goal_init4,3)
+Robot4 = Robot_Sim(x_init4, goal_init4,3,0)
 
-const_obs = np.array([[25], [35]])
-const_obs2 = np.array([[25], [35]])
+""" const_obs = np.array([[25], [35]])
+const_obs2 = np.array([[25], [35]]) """
+const_obs = np.array([[-0.4], [-0.6]])
+const_obs2 = np.array([[0.6], [-1.0]])
 cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[],'alpha_dotF1':0,'alpha_dotF2':0}
 
 cent['cent_F1'] = np.array([10,10]).reshape(2,1)
@@ -151,7 +141,7 @@ cent['cent_F1'] = np.array([10,10]).reshape(2,1)
 # These are static obstacles we present to the robot
 obs = np.hstack((const_obs, const_obs2))
 
-a, ax1 = plt.subplots()
+a, ax1 = plt.subplots(figsize=(13,12))
 
 # Add all thge robots to list robots
 roro =[robot1,Robot2,Robot3,Robot4]
@@ -168,10 +158,16 @@ def calc_vel_c(pres,prev,dt):
     rel_vel = np.divide(np.subtract(pres,prev),dt)
     #print(rel_vel.shape)
     return rel_vel
-
-gridlength = np.array([25,25])
+def clear_data():
+    names = ['h011obs_1form.csv','h111obs_1form.csv','h211obs_1form.csv','h311obs_1form']
+    for i in range(3):
+        with open(names[i], 'w', newline='') as file:
+            file.close()
+gridlength = np.array([3,2.5])
 
 def f_control(N,rbts):
+
+    clear_data()
 
     tt = 0
     while not check_goal_reached(rbts):
@@ -184,7 +180,7 @@ def f_control(N,rbts):
         r = 0
         for i in range(N):          
             #cent['cent_F1'] = get_form_cent(Robots1)
-            cent['cent_F2'] = np.array([5,5]).reshape(2,)
+            cent['cent_F2'] = np.array([-2,-2]).reshape(2,)
 
             #print(cent['cent_F2'])
             
@@ -200,22 +196,18 @@ def f_control(N,rbts):
             if tt>0:
 
 
-                rbts[i].robot_step(obs,roro,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],45,[0,0],0)
-                
-                print(obs[0])
+                rbts[i].robot_step(obs,roro,i,1,7,L3,weights_rec3,e1,cent['cent_F2'],0,[0,0],0)
+            
 
         if tt%50 ==0:
             print(tt)
             plt.cla()
 
             for robot in rbts:
-                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength)
+                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,np.array([2,-0.2]),0,round(time.time() - start_time,2))
             
             plt.pause(0.0001)
-    for robot in rbts:
-    
-        robot.ecbf.new_plt_h(1)
-        #robot.ecbf.dist_plot()
+   
     
 if __name__ =="__main__":
 

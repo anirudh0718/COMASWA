@@ -11,11 +11,11 @@ start_time = time.time()
 
 
 # Tolerance
-e1 = 0.1
+e1 = 0.03
 e2 = 0.4
 # Formation Distance for rectangle shape
-Df_l = 2
-Df_b = 1
+Df_l = 0.5
+Df_b = 0.5
 
 ddiag_rec =np.sqrt(np.power(Df_l,2) + np.power(Df_b,2))  # 2.2360
 
@@ -45,10 +45,10 @@ weights_rec2 = np.array([
 #start.append(get_rob_gposes(np.array([0,0])))
 #start.append(get_rob_rec_pos(np.array([-3,-2])))
 #start.append((get_rob_rec_pos(np.array([25,25]))))
-start1,start2 = gen2(np.array([0,2]).reshape(2,))
-goal1,goal2 = gen2(np.array([20,2]).reshape(2,))
-start3,start4 = gen2(np.array([20,0]).reshape(2,))
-goal3,goal4 = gen2(np.array([0,0]).reshape(2,))
+start1,start2 = gen2(np.array([-1.6,1]).reshape(2,),0.5)
+goal1,goal2 = gen2(np.array([1.6,-0.2]).reshape(2,),0.5)
+start3,start4 = gen2(np.array([1.6,0.5]).reshape(2,),0.5)
+goal3,goal4 = gen2(np.array([-1.6,1]).reshape(2,),0.5)
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
@@ -85,7 +85,7 @@ const_obs2 = np.array([[30], [40]])
 obs = np.hstack((const_obs, const_obs2))
 N = len(roro)
 cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[],'alpha_dotF1':0,'alpha_dotF2':0}
-a, ax1 = plt.subplots(figsize=(15,15))#constrained_layout=True)
+a, ax1 = plt.subplots(figsize=(10,10))#constrained_layout=True)
 
 Top = 1
 
@@ -136,15 +136,19 @@ def calc_vel_c(pres,prev,dt):
     return rel_vel*(np.pi/180)
 
 
-gridlength = np.array([25,25])
+gridlength = np.array([3,2.5])
 
-
+def clear_data():
+    for i in range(2):
+        for j in range(2):
+            file = open("h{}{}".format(i,j)+'2Robot'+'.csv',"w")
+            file.close()
+    
 def f_control(N,rbts,rbts1):
-
+    clear_data()
+    #exit()
     tt = 0
-    file = open("h.txt","w")
-
-    file.close()
+    
     while not check_goal_reached(rbts):
 
         tt = tt +1
@@ -173,8 +177,8 @@ def f_control(N,rbts,rbts1):
 
 
 
-                rbts[i].robot_step(obs,roro,i,i,7,L2,weights_rec2,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF2'])
-                rbts1[i].robot_step(obs,roro1,i,i,7,L2,weights_rec2,e1,cent['cent_F1'],cent['AF1'],cent['rel_velF1'],cent['alpha_dotF1'])
+                rbts[i].robot_step(obs,roro,i,0,7,L2,weights_rec2,e1,cent['cent_F2'],cent['AF2'],cent['rel_velF2'],cent['alpha_dotF2'])
+                rbts1[i].robot_step(obs,roro1,i,1,7,L2,weights_rec2,e1,cent['cent_F1'],cent['AF1'],cent['rel_velF1'],cent['alpha_dotF1'])
                 
                 cent['rel_velF1'] = calc_vel(get_form_cent(rbts),cent['cent_F1'],0.01)
                 cent['rel_velF2'] = calc_vel(get_form_cent(rbts1),cent['cent_F2'],0.01)
@@ -200,15 +204,14 @@ def f_control(N,rbts,rbts1):
         if tt%50 ==0:
             print(tt)
             plt.cla()
-
             for robot in rbts12:
                 plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,robot.goal,robot.form_id,round(time.time() - start_time,2))
             
-            plt.pause(0.00001)
+            plt.pause(0.001)
 
-    for robot in rbts12:
+    """ for robot in rbts12:
     
-        robot.ecbf.new_plt_h(1)
+        robot.ecbf.new_plt_h(1) """
     
         #robot.ecbf.dist_plot()
 

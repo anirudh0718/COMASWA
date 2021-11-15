@@ -3,8 +3,10 @@ import matplotlib.pyplot as plt
 import time
 from cvxopt import matrix, solvers
 import functions
-import json,csv
-K = 1
+import pandas as pd
+K = 2
+Ds = 0.2
+e = 0.1
 # Laplacian matrix for a square/Rectangle shape with 4 robots|| Constarints for 2 and 4
 
 Use_nom = False
@@ -18,6 +20,7 @@ class ebcf_control:
         self.h = {'q': [],
                     'h':[]}
         self.id = id
+        self.count =0
 
         self.dist = []
         self.vel = []
@@ -80,25 +83,66 @@ class ebcf_control:
         return G
     
     def compute_nom(self):
-        u_nom = K*((self.state["q"][:2]).T-self.goal.T )
+        #print('State of robot',self.state['q'])
+        u_nom = -1*K*((self.state["q"][:2]).T-self.goal.T )
+        #print('Ouput of nominal', u_nom)
         return u_nom
 
     def compute_safe(self,obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot):
 
-        #print('This is i: ',i)
+        
+        name = 'ROS1FORM2Goal'
+        """ try:
+            a = 0
+            #print('This is i: ',i)
+            P = np.array([[2, 0],[0, 2]])
+            q = -2*self.compute_nom().reshape(2,)
+
+        #print('This is the value of nominal',q)
+            h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot)
+
+            df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8],'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+            print('this is h',h)
+            if self.count <1:
+                df.to_csv('h{}{}.csv'.format(n,r),header=True,index=False, mode='a')
+            else:
+                df.to_csv('h{}{}.csv'.format(n,r),header=False,index=False, mode='a')
+
+        #self.dist.append(functions.calc_dist(self.state,Robots,n,r,L))
+
+            G = self.compute_G(obs,Robots,n,r,id,L,centre,angle)
+
+        #print('This is G', G)
+        #exit()
+            sol = solve_qp(P,q,G,h)
+            u_st = sol['x']
+            vel = np.ndarray.flatten(np.array(u_st)) 
+
+            self.count = self.count+1
+
+        except ValueError:
+            u_st = np.array([0,0]).reshape(2,) """
+            #print('This is i: ',i)
         P = np.array([[2, 0],[0, 2]])
-        q = 2*self.compute_nom().reshape(2,)
+        q = -2*self.compute_nom().reshape(2,)
 
         #print('This is the value of nominal',q)
         h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot)
 
-        self.h['h'].append(h)
+        df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8],'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+        #df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8]}) #,'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+        """ self.h['h'].append(h)
         file = open('h{}{}.txt'.format(n,r),'a')
-        file_v = open('v{}{}.txt'.format(n,r),'a')
-        with open('h{}{}.txt'.format(n,r),'a') as f:
+        file_v = open('v{}{}.txt'.format(n,r),'a') """
+        """ with open('h{}{}.txt'.format(n,r),'a') as f:
             json.dump(h.tolist(),f)
-            f.write('\n')
+            f.write('\n') """
         print('this is h',h)
+        if self.count <1:
+            df.to_csv('h{}{}'.format(n,r)+name+'.csv',header=True,index=False, mode='a')
+        else:
+            df.to_csv('h{}{}'.format(n,r)+name+'.csv',header=False,index=False, mode='a')
+
         #self.dist.append(functions.calc_dist(self.state,Robots,n,r,L))
 
         G = self.compute_G(obs,Robots,n,r,id,L,centre,angle)
@@ -108,9 +152,10 @@ class ebcf_control:
         sol = solve_qp(P,q,G,h)
         u_st = sol['x']
         vel = np.ndarray.flatten(np.array(u_st)) 
-        with open('v{}{}.txt'.format(n,r),'a') as f:
+        """ with open('v{}{}.txt'.format(n,r),'a') as f:
             json.dump(vel.tolist(),f)
-            f.write('\n')
+            f.write('\n') """
+        self.count = self.count+1
         return u_st
         
         
@@ -129,6 +174,64 @@ class ebcf_control:
         except ValueError:
             u_st = matrix([0,0])
             print('Robot {} failed'.format(i+1)) """
+
+
+    def compute_A_far(self,obst):
+            A = np.empty((0,2))
+
+            #print('This is obst',obst[0,:])
+
+            #print('This is the shape', obst.shape)
+            #exit()
+
+            for i in range(obst.shape[1]):
+                
+                sub = np.atleast_2d(self.state["q"][:2]).T - obst[i, :].T.reshape(2,1)
+                xo = sub[0]
+                yo = sub[1]
+
+                atmp = np.array([np.hstack((xo, yo))])
+                A =np.array(np.vstack((A,atmp)))
+            return A
+
+    def compute_h_far(self,obst):
+        h = np.zeros((obst.shape[1], 1))
+        for i in range(obst.shape[1]):
+            sub = np.atleast_2d(self.state["q"][:2]).T - obst[i, :].T.reshape(2,1)
+            xo = sub[0]
+            yo = sub[1]
+            h[i] = np.power(xo,2)+ np.power(yo,2)- np.power(Ds-e,2) 
+        return h
+
+
+    def compute_safe_f(self,obs,u):
+        A = self.compute_A_far(obs)
+        h = self.compute_h_far(obs)
+
+        
+
+        P = np.array([[2, 0],[0, 2]])
+        G = -2*A
+        """ print('This is u nom',self.compute_nom())
+        exit() """
+        q = -2*u
+        #print('This is q',q)
+
+        #print(A.shape,h.shape,P.shape,G.shape,q.shape)
+
+        #exit()
+        #self.h['h'].append(h)
+        print(G,q)
+        
+        sol = solve_qp(P,q,G,h)
+
+        u_st = sol['x']
+
+        return u_st
+
+
+
+    
         
 
     # Creates respective arrays for h(x) values to be stored for plotting

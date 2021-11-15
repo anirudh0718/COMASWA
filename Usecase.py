@@ -5,7 +5,7 @@ import  matplotlib.pyplot as plt
 from FC_to_Goal import get_rob_gposes,get_pose,get_rob_rec_pos,get_turned_rec,get_turn_orient,get_rob_rec_pos_far
 from math import degrees
 import time
-
+from functions import topological_neighbors
 start_time = time.time()
 
 # Laplacian matrix for a square/ Rec shape with 4 robots || Constarints for 1 and 3 2 and 4
@@ -67,7 +67,7 @@ start.append((get_rob_rec_pos(np.array([10,10]))))
 # Starting postion of our robots
 start_far = []
 #start.append(get_rob_gposes(np.array([0,0])))
-start_far.append(get_rob_rec_pos_far(np.array([-10,0])))
+start_far.append(get_rob_rec_pos_far(np.array([-10,-10])))
 start_far.append((get_rob_rec_pos_far(np.array([10,10]))))
 
 # Goal positions of our robots
@@ -85,25 +85,25 @@ goal.append(get_rob_rec_pos(np.array([0,3])))
 #Robot 1
 x_init1 = start_far[0][0]
 goal_init1 =goal[0][0]
-robot1 = Robot_Sim(x_init1, goal_init1, 0)
+robot1 = Robot_Sim(x_init1, goal_init1, 0,1)
 
 ### Robot 2
 
 x_init2 = start_far[0][1]
 goal_init2 =goal[0][1]
-Robot2 = Robot_Sim(x_init2, goal_init2,1)
+Robot2 = Robot_Sim(x_init2, goal_init2,1,1)
 
 ### Robot 3
 
 x_init3 = start_far[0][2]
 goal_init3 =goal[0][2]
-Robot3 = Robot_Sim(x_init3, goal_init3,2)
+Robot3 = Robot_Sim(x_init3, goal_init3,2,1)
 
 ### Robot 4
 
 x_init4 = start_far[0][3]
 goal_init4 =goal[0][3]
-Robot4 = Robot_Sim(x_init4, goal_init4,3)
+Robot4 = Robot_Sim(x_init4, goal_init4,3,1)
 
 
 
@@ -114,25 +114,25 @@ Robot4 = Robot_Sim(x_init4, goal_init4,3)
 #Robot 1
 x_init21 = start_far[1][0]
 goal_init21 =goal[1][0]
-robot21 = Robot_Sim(x_init21, goal_init21, 4)
+robot21 = Robot_Sim(x_init21, goal_init21, 4,2)
 
 ### Robot 2
 
 x_init22 = start_far[1][1]
 goal_init22 =goal[1][1]
-Robot22 = Robot_Sim(x_init22, goal_init22,5)
+Robot22 = Robot_Sim(x_init22, goal_init22,5,2)
 
 ### Robot 3
 
 x_init23 = start_far[1][2]
 goal_init23 =goal[1][2]
-Robot23 = Robot_Sim(x_init23, goal_init23,6)
+Robot23 = Robot_Sim(x_init23, goal_init23,6,2)
 
 ### Robot 4
 
 x_init24 = start_far[1][3]
 goal_init24 =goal[1][3]
-Robot24 = Robot_Sim(x_init24, goal_init24,7)
+Robot24 = Robot_Sim(x_init24, goal_init24,7,2)
 
 """ const_obs = np.array([[13], [10]])
 const_obs2 = np.array([[13], [22]]) """
@@ -163,7 +163,7 @@ N = len(roro)
 cent['cent_F1'] = get_form_cent(Robots1).reshape(2,1)
 cent['cent_F2'] = get_form_cent(Robots2).reshape(2,1)
 
-
+poses = get_pose(Robots1)
 
 a, ax1 = plt.subplots(figsize=(10,10))
 
@@ -199,6 +199,8 @@ def clear_data():
 
 
 def f_control(N,rbts):
+    dxi = np.zeros((2, 4))
+    safe_dxi = np.zeros((2,4))
 
     tt = 0
     file = open("h.txt","w")
@@ -207,7 +209,7 @@ def f_control(N,rbts):
     while not check_goal_reached(rbts):
 
         tt = tt +1
-        for i in range(N):          
+        for i in range(4):          
             cent['cent_F1'] = get_form_cent(Robots1)
             cent['cent_F2'] = get_form_cent(Robots2)
 
@@ -228,7 +230,28 @@ def f_control(N,rbts):
             IF Id = 7 --> obs,Form,Ellipse
             IF Id = 8 --> Only ellipticalobstacle avoidance
             Formation greater case = |xi -xj| - (Df - e) > 0"""
-            if tt>0:
+
+            if tt >0:
+                for j in topological_neighbors(L3,i):
+                    error = Robots1[j].state['q'][:2].reshape(2,1) - Robots1[i].state['q'][:2].reshape(2,1)
+                    dxi[:, i] += ((np.power(np.linalg.norm(error), 2)- np.power(weights_rec3[i, j], 2))*error ).reshape(2,)
+
+
+                    
+                new_pos = np.delete(poses,(i),axis=1)
+                #print(new_pos)
+                #exit()
+                safe_d = np.zeros((2,))
+                safe_d = np.array((Robots1[i].ecbf.compute_safe_f(new_pos.T,dxi[:,i])))
+                #safe_d = np.array((Robots1[i].ecbf.compute_safe(new_pos.T,dxi[:,i])))
+
+                safe_dxi[:, i] = safe_d.reshape(2,)
+
+                Robots1[i].robot_step_n(safe_dxi[:, i])
+                    
+
+
+            if tt>10000000000000000000:
 
 
 
@@ -261,14 +284,14 @@ def f_control(N,rbts):
             print(tt)
             plt.cla()
 
-            for robot in rbts:
+            for robot in Robots1:
                 plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,robot.goal,robot.form_id,round(time.time() - start_time,2))
             
             plt.pause(0.00001)
 
-    for robot in rbts:
+    """ for robot in rbts:
     
-        robot.ecbf.new_plt_h(1)
+        robot.ecbf.new_plt_h(1) """
 
 
 

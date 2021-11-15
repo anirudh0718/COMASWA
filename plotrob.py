@@ -35,22 +35,22 @@ def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength,goal,id,ti
         #print('This is obstacle{}'.format(i),new_obs[i,0],new_obs[i,1])
         plot_handle.plot(new_obs[i,0],new_obs[i,1], '8k') # obs
 
-        ell = Ellipse((new_obs[0,0],new_obs[0,1]), 4, 4, 0)
-        ell2 = Ellipse((new_obs[1,0],new_obs[1,1]), 4, 4, 0)
+        ell = Ellipse((new_obs[0,0],new_obs[0,1]), 1, 1, 0)
+        ell2 = Ellipse((new_obs[1,0],new_obs[1,1]), 1, 1, 0)
         ell.set_alpha(0.3)
         ell.set_facecolor(np.array([1, 0, 0]))
         ell2.set_alpha(0.3)
         ell2.set_facecolor(np.array([1, 0, 0]))
 
     #print((centre_hist))
-    ell3 = Ellipse((centre_hist[-1, 0], centre_hist[-1, 1]), 3, 5, angle_hist[-1])
+    ell3 = Ellipse((centre_hist[-1, 0], centre_hist[-1, 1]), 0.6, 0.4, angle_hist[-1])
     #plot_handle.plot(centre_hist[:, 0],centre_hist[:, 1],'2k')
     ell3.set_alpha(0.3)
-    ell3.set_facecolor(np.array([1, 0, 0]))
+    ell3.set_facecolor(np.array([1, 0, 1]))
     
-    #plot_handle.add_artist(ell)
-    #plot_handle.add_artist(ell2)
-    #plot_handle.add_artist(ell3)
+    plot_handle.add_artist(ell)
+    plot_handle.add_artist(ell2)
+    plot_handle.add_artist(ell3)
     #plot_handle.axis('equal')
 
     annotate(g,time_str)

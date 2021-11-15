@@ -13,10 +13,16 @@ N = 410
 
 pylab.ion()
 
-Ds = 2
+Ds = 0.2
 
-a = 1.5
-b = 2.5
+#a = 0.2
+#b = 0.1
+""" 
+a = 2
+b = 1 """
+
+a = 0.5
+b = 0.25
 
 Use_TVCBF = False
 Use_TVCBF_F = False
@@ -117,6 +123,7 @@ def compute_hf_l(state,Robots,n,r,L,weights,e):
 
 def compute_hf_Form(state,a,b,t,centre,c_vel,a_dot):
 
+
     t = radians(t)
     if len(c_vel)>0:
         rel_vel = np.array([c_vel[0],c_vel[1]]).reshape(2,1)
@@ -184,7 +191,7 @@ def compute_hf_4(obs,state,Robots,n,r,L,weights,e,centre,angle):
 
 #Compute h for obs(centre) and Formation
 def compute_hf_7(obs,state,Robots,n,r,L,weights,e,centre,angle,c_vel,a_dot):
-    g =2
+    g =1.12
     vel_fac = np.array([g,g]).reshape(2,1)
     #print((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre,c_vel),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
     #print((compute_hobs(obs,state).shape,compute_hf_Form(state,3,2,angle,centre,c_vel).shape,compute_hf_g(state,Robots,n,r,L,weights,e).shape,compute_hf_l(state,Robots,n,r,L,weights,e).shape,vel_fac.shape,vel_fac.shape))
