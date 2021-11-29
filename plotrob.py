@@ -18,13 +18,13 @@ def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength,goal,id,ti
     plot_handle.set_ylim([-p, p])
     plot_handle.plot(goal[0], goal[1], color='green', marker='x')
 
-    g = plot_handle.annotate('',(-20,23),**text_kwargs)
+    g = plot_handle.annotate('',(-2,2),**text_kwargs)
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1],'k')
     #plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
     if id == 1:
-        plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], marker='s',markersize=6) # current
+        plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], marker='s',markersize=20) # current
     else:
-        plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], marker=(8, 0),markersize =6) # current
+        plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], marker=(8, 0),markersize =20) # current
 
     """ plot_handle.plot(centre_hist[:, 0], centre_hist[:, 1],'k')
     #plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
@@ -35,11 +35,11 @@ def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength,goal,id,ti
         #print('This is obstacle{}'.format(i),new_obs[i,0],new_obs[i,1])
         plot_handle.plot(new_obs[i,0],new_obs[i,1], '8k') # obs
 
-        ell = Ellipse((new_obs[0,0],new_obs[0,1]), 1, 1, 0)
-        ell2 = Ellipse((new_obs[1,0],new_obs[1,1]), 1, 1, 0)
-        ell.set_alpha(0.3)
+        ell = Ellipse((new_obs[0,0],new_obs[0,1]), 0.86, 0.86, 0)
+        ell2 = Ellipse((new_obs[1,0],new_obs[1,1]), 0.86, 0.86, 0)
+        ell.set_alpha(0.2)
         ell.set_facecolor(np.array([1, 0, 0]))
-        ell2.set_alpha(0.3)
+        ell2.set_alpha(0.2)
         ell2.set_facecolor(np.array([1, 0, 0]))
 
     #print((centre_hist))
@@ -50,7 +50,7 @@ def plot_step(state_hist, plot_handle,new_obs,centre,angle,gridlength,goal,id,ti
     
     plot_handle.add_artist(ell)
     plot_handle.add_artist(ell2)
-    plot_handle.add_artist(ell3)
+    #plot_handle.add_artist(ell3)
     #plot_handle.axis('equal')
 
     annotate(g,time_str)

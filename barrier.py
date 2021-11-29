@@ -91,7 +91,7 @@ class ebcf_control:
     def compute_safe(self,obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot):
 
         
-        name = 'ROS1FORM2Goal'
+        name = '1obs_1form'
         """ try:
             a = 0
             #print('This is i: ',i)
@@ -129,15 +129,15 @@ class ebcf_control:
         #print('This is the value of nominal',q)
         h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot)
 
-        df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8],'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
-        #df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8]}) #,'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+        #df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8],'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+        df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8]}) #,'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
         """ self.h['h'].append(h)
         file = open('h{}{}.txt'.format(n,r),'a')
         file_v = open('v{}{}.txt'.format(n,r),'a') """
         """ with open('h{}{}.txt'.format(n,r),'a') as f:
             json.dump(h.tolist(),f)
             f.write('\n') """
-        print('this is h',h)
+        #print('this is h',h)
         if self.count <1:
             df.to_csv('h{}{}'.format(n,r)+name+'.csv',header=True,index=False, mode='a')
         else:

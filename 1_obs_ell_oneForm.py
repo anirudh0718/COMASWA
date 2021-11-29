@@ -99,7 +99,7 @@ start.append(get_rob_rec_pos_ros(np.array([-1.8,-0.6])))
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_turn_orient(np.array([1.4,-0.2]))) # Turned Rectangle
+goal.append(get_turn_orient(np.array([2,-0.2]))) # Turned Rectangle
 
 #print('These are the starting postions of the robots',start)
 #print('These are goal position f the robots',goal)

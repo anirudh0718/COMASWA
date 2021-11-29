@@ -148,25 +148,25 @@ goal.append(get_rob_rec_pos(np.array([13,13]))) # Turned Rectangle
 #Robot 1
 x_init1 = start[0][0]
 goal_init1 =goal[0][0]
-robot1 = Robot_Sim(x_init1, goal_init1, 0)
+robot1 = Robot_Sim(x_init1, goal_init1,0, 0)
 
 ### Robot 2
 
 x_init2 = start[0][1]
 goal_init2 =goal[0][1]
-Robot2 = Robot_Sim(x_init2, goal_init2,1)
+Robot2 = Robot_Sim(x_init2, goal_init2,1,0)
 
 ### Robot 3
 
 x_init3 = start[0][2]
 goal_init3 =goal[0][2]
-Robot3 = Robot_Sim(x_init3, goal_init3,2)
+Robot3 = Robot_Sim(x_init3, goal_init3,2,0)
 
 ### Robot 4
 
 x_init4 = start[0][3]
 goal_init4 =goal[0][3]
-Robot4 = Robot_Sim(x_init4, goal_init4,3)
+Robot4 = Robot_Sim(x_init4, goal_init4,3,0)
 
 const_obs = np.array([[-10], [35]])
 const_obs2 = np.array([[-15], [35]])
@@ -233,7 +233,7 @@ def f_control(N,rbts):
             if tt>0:
 
 
-                rbts[i].robot_step(obs,roro,i,i,7,L3,weights_rec3,e1,cent['cent_F2'],0,[-0.02,-0.02],0)
+                rbts[i].robot_step(obs,roro,i,1,7,L3,weights_rec3,e1,cent['cent_F2'],0,[-0.02,-0.02],0)
                 
                 
 
