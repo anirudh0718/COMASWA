@@ -141,7 +141,7 @@ cent['cent_F1'] = np.array([10,10]).reshape(2,1)
 # These are static obstacles we present to the robot
 obs = np.hstack((const_obs, const_obs2))
 
-a, ax1 = plt.subplots(figsize=(13,12))
+a, ax1 = plt.subplots(figsize=(20,20))
 
 # Add all thge robots to list robots
 roro =[robot1,Robot2,Robot3,Robot4]

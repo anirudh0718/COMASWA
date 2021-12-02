@@ -133,7 +133,7 @@ start.append((get_rob_rec_pos(np.array([0.5,1]))))
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
-goal.append(get_rob_rec_pos(np.array([0.5,1.4]))) # Turned Rectangle
+goal.append(get_rob_rec_pos(np.array([0.8,1.4]))) # Turned Rectangle
 goal.append(get_rob_rec_pos(np.array([-1.4,-0.8])))
 
 #print('These are the starting postions of the robots',start)
@@ -227,7 +227,7 @@ cent['cent_F2'] = get_form_cent(Robots2).reshape(2,1)
 """ print(cent['cent_F1'])
 exit() """
 
-a, ax1 = plt.subplots(figsize=(10,10))
+a, ax1 = plt.subplots(figsize=(15,10))
 
 Top = 1
 

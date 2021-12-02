@@ -13,7 +13,7 @@ N = 410
 
 pylab.ion()
 
-Ds = 0.5
+Ds = 0.2
 
 #a = 0.2
 #b = 0.1
@@ -21,8 +21,8 @@ Ds = 0.5
 a = 2
 b = 1 """
 
-a = 0.5
-b = 0.25
+a = 0.3
+b = 0.3
 
 Use_TVCBF = False
 Use_TVCBF_F = False
@@ -153,7 +153,7 @@ def compute_hf_Form(state,a,b,t,centre,c_vel,a_dot):
     b_obs = -p*rel_vel[1]
     c_obs = xalphobs*alpha_dot
 
-    gamma = 1
+    gamma = 0.005
     pow = 1
 
     if Use_TVCBF:
@@ -191,11 +191,19 @@ def compute_hf_4(obs,state,Robots,n,r,L,weights,e,centre,angle):
 
 #Compute h for obs(centre) and Formation
 def compute_hf_7(obs,state,Robots,n,r,L,weights,e,centre,angle,c_vel,a_dot):
-    g =1.12
+    g =5
     vel_fac = np.array([g,g]).reshape(2,1)
     #print((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre,c_vel),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
     #print((compute_hobs(obs,state).shape,compute_hf_Form(state,3,2,angle,centre,c_vel).shape,compute_hf_g(state,Robots,n,r,L,weights,e).shape,compute_hf_l(state,Robots,n,r,L,weights,e).shape,vel_fac.shape,vel_fac.shape))
     com_h = np.vstack((compute_hobs(obs,state),compute_hf_Form(state,a,b,angle,centre,c_vel,a_dot),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
+    return com_h
+
+def compute_hf_6(obs,state,Robots,n,r,L,weights,e,centre,angle,c_vel,a_dot):
+    g =1.12
+    vel_fac = np.array([g,g]).reshape(2,1)
+    #print((compute_hobs(obs,state),compute_hf_Form(state,3,2,angle,centre,c_vel),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
+    #print((compute_hobs(obs,state).shape,compute_hf_Form(state,3,2,angle,centre,c_vel).shape,compute_hf_g(state,Robots,n,r,L,weights,e).shape,compute_hf_l(state,Robots,n,r,L,weights,e).shape,vel_fac.shape,vel_fac.shape))
+    com_h = np.vstack((compute_hobs(obs,state),compute_hf_g(state,Robots,n,r,L,weights,e),compute_hf_l(state,Robots,n,r,L,weights,e),vel_fac,vel_fac))
     return com_h
 
 #Compute h for obs and Formation_greater case
@@ -248,6 +256,19 @@ def compute_Gf_7(obs,state,Robots,n,r,L,centre,angle):
     A2 = -A1
     #print(A.shape,Af.shape,AF.shape,A1.shape,A2.shape)
     Af_4 = np.vstack((A,AF,Af,A1,A2))
+    return Af_4
+
+def compute_Gf_6(obs,state,Robots,n,r,L,centre,angle):
+    angle = radians(angle)
+    A = -2*compute_A_obs(state,obs)
+    Af = compute_Gf(state,Robots,n,r,L)
+    AF = compute_A_F(state,a,b,centre,angle)
+    #print('This is G for formation avoidance', AF)
+    A1 = np.identity((2))
+    
+    A2 = -A1
+    #print(A.shape,Af.shape,AF.shape,A1.shape,A2.shape)
+    Af_4 = np.vstack((A,Af,A1,A2))
     return Af_4
 # Compute G for obs and form_greater case
 

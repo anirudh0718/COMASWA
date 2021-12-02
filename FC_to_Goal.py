@@ -9,8 +9,8 @@ d = 2
 l = 0.5
 b = 0.25
 
-l1 = 0.5
-b1 = 0.25
+l1 = 1
+b1 = 0.5
 
 def get_rob_gposes(centroid):
     P1_x = centroid[0]- d/2

@@ -48,7 +48,7 @@ weights_rec2 = np.array([
 start1,start2 = gen2(np.array([-1.6,1]).reshape(2,),0.5)
 goal1,goal2 = gen2(np.array([1.6,-0.2]).reshape(2,),0.5)
 start3,start4 = gen2(np.array([1.6,0.5]).reshape(2,),0.5)
-goal3,goal4 = gen2(np.array([-1.6,1]).reshape(2,),0.5)
+goal3,goal4 = gen2(np.array([-1.8,1]).reshape(2,),0.5)
 # Goal positions of our robots
 goal = []
 #goal.append(get_rob_gposes(np.array([20,20]))) # sqaure
@@ -85,7 +85,7 @@ const_obs2 = np.array([[30], [40]])
 obs = np.hstack((const_obs, const_obs2))
 N = len(roro)
 cent = {'cent_F1':[],'cent_F2':[],'a':3,'b':2,'AF1':0,'AF2':0,'rel_velF1':[],'rel_velF2':[],'alpha_dotF1':0,'alpha_dotF2':0}
-a, ax1 = plt.subplots(figsize=(10,10))#constrained_layout=True)
+a, ax1 = plt.subplots(figsize=(15,15))#constrained_layout=True)
 
 Top = 1
 
@@ -205,7 +205,7 @@ def f_control(N,rbts,rbts1):
             print(tt)
             plt.cla()
             for robot in rbts12:
-                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,robot.goal,robot.form_id,round(time.time() - start_time,2))
+                plot_step(robot.state_hist,ax1,obs,robot.n_fcentre,robot.angle,gridlength,robot.goal,robot.form_id,round(time.time() - start_time,2),robot.id)
             
             plt.pause(0.001)
 

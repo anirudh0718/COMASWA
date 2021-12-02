@@ -4,7 +4,7 @@ import time
 from cvxopt import matrix, solvers
 import functions
 import pandas as pd
-K = 2
+K = 5
 Ds = 0.2
 e = 0.1
 # Laplacian matrix for a square/Rectangle shape with 4 robots|| Constarints for 2 and 4
@@ -44,7 +44,7 @@ class ebcf_control:
 
         if id ==6 :
             #Implement for both obstacles and formation
-            h = functions.compute_hf_4(obs,self.state,Robots,n,r,L,weights,e,centre,angle)
+            h= functions.compute_hf_6(obs,self.state,Robots,n,r,L,weights,e,centre,angle,c_vel,a_dot)
         if id ==7:
             h= functions.compute_hf_7(obs,self.state,Robots,n,r,L,weights,e,centre,angle,c_vel,a_dot)
         if id ==8:
@@ -72,7 +72,7 @@ class ebcf_control:
             G = functions.compute_Gf_l(obs,self.state,Robots,n,r,L)
 
         if id ==6:
-            G = functions.compute_Gf_4(obs,self.state,Robots,n,r,L,centre,angle)
+            G = functions.compute_Gf_6(obs,self.state,Robots,n,r,L,centre,angle)
         if id ==7:
             # Implement barrier for only Obstacles
             G = functions.compute_Gf_7(obs,self.state,Robots,n,r,L,centre,angle)
@@ -87,11 +87,24 @@ class ebcf_control:
         u_nom = -1*K*((self.state["q"][:2]).T-self.goal.T )
         #print('Ouput of nominal', u_nom)
         return u_nom
+    def savedata(self,h,n,r):
+        #name = '2Form'
+        name = 'movingobs'
+
+        #df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8],'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+        df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8]}) #,'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+
+
+
+        if self.count <1:
+            df.to_csv('h{}{}'.format(n,r)+name+'.csv',header=True,index=False, mode='a')
+        else:
+            df.to_csv('h{}{}'.format(n,r)+name+'.csv',header=False,index=False, mode='a')
 
     def compute_safe(self,obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot):
 
         
-        name = '1obs_1form'
+        
         """ try:
             a = 0
             #print('This is i: ',i)
@@ -129,19 +142,17 @@ class ebcf_control:
         #print('This is the value of nominal',q)
         h = self.compute_h(obs,Robots,n,r,id,L,weights,e,centre,angle,c_vel,a_dot)
 
+        #self.savedata(h,n,r)
         #df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8],'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
-        df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8]}) #,'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
+        #df =  pd.DataFrame({'h0':h[0],'h1':h[1],'h2':h[2],'h3':h[3],'h4':h[4],'h5':h[5],'h6':h[6],'h7':h[7],'h8':h[8]}) #,'h9':h[9],'h10':h[10],'h11':h[11],'h12':h[12]})
         """ self.h['h'].append(h)
         file = open('h{}{}.txt'.format(n,r),'a')
         file_v = open('v{}{}.txt'.format(n,r),'a') """
         """ with open('h{}{}.txt'.format(n,r),'a') as f:
             json.dump(h.tolist(),f)
             f.write('\n') """
-        #print('this is h',h)
-        if self.count <1:
-            df.to_csv('h{}{}'.format(n,r)+name+'.csv',header=True,index=False, mode='a')
-        else:
-            df.to_csv('h{}{}'.format(n,r)+name+'.csv',header=False,index=False, mode='a')
+        print('this is h',h)
+        
 
         #self.dist.append(functions.calc_dist(self.state,Robots,n,r,L))
 
@@ -150,11 +161,7 @@ class ebcf_control:
         #print('This is G', G)
         #exit()
         sol = solve_qp(P,q,G,h)
-        u_st = sol['x']
-        vel = np.ndarray.flatten(np.array(u_st)) 
-        """ with open('v{}{}.txt'.format(n,r),'a') as f:
-            json.dump(vel.tolist(),f)
-            f.write('\n') """
+        u_st =  sol['x']
         self.count = self.count+1
         return u_st
         

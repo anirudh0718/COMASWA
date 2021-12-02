@@ -68,15 +68,15 @@ def checkAngularLimitVelocity(vel):
     return vel
 
 
-const_obs = np.array([[-0.4], [-0.6]])
-const_obs2 = np.array([[0.6], [-1.0]])
+const_obs = np.array([[-4], [-0.6]])
+const_obs2 = np.array([[6], [-1.0]])
 obs = np.hstack((const_obs, const_obs2))
 
 #poses = [r_pose,b_pose,g_pose]
 subs =[]
 pubs =[]
 N = 4
-Timer = 200
+Timer = 10
 
 robot_names =['tb3_0','tb3_1','tb3_2','tb3_3']
 class consesus_controller:
